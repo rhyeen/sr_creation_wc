@@ -1,0 +1,22 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sr-account-app">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <p>Test sr-account app</p>
+  </template>
+
+  <script>
+    class SrAccountApp extends Polymer.Element {
+      static get is() { return 'sr-account-app'; }
+    }
+
+    window.customElements.define(SrAccountApp.is, SrAccountApp);
+  </script>
+</dom-module>

@@ -1,0 +1,26 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sr-summary-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+    <div class="card">
+      <h1>Summary</h1>
+      <p>Stuff</p>
+      <p>Stuff 2</p>
+    </div>
+  </template>
+
+  <script>
+    class SrSummaryView extends Polymer.Element {
+      static get is() { return 'sr-summary-view'; }
+    }
+
+    window.customElements.define(SrSummaryView.is, SrSummaryView);
+  </script>
+</dom-module>
