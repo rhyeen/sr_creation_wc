@@ -10,6 +10,7 @@
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 
 
 <link rel="import" href="../page/sr-summary-view.html">
@@ -115,7 +116,7 @@
         Prophecy of the bloodmoon god
       </div> -->
       <app-toolbar>
-        <div main-title>Summary</div>
+        <div main-title>Prophecy of the Bloodmoon God</div>
         <paper-menu-button dynamic-align="true">
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
           <paper-listbox slot="dropdown-content">
@@ -250,12 +251,10 @@
       </div>
     </paper-card>
 
-    <paper-card image="http://d226oxd1fw0z1k.cloudfront.net/wp-content/uploads/2016/02/star-wars-land-marketplace-concept-art-2.jpg">
-      <!-- <div class="header">
-        Prophecy of the bloodmoon god
-      </div> -->
+    <paper-card>
       <app-toolbar>
-        <div main-title>Village Market</div>
+        <div main-title>Traveling through the market</div>
+        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="detailSummary1"></paper-icon-button>
         <paper-menu-button dynamic-align="true">
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
           <paper-listbox slot="dropdown-content">
@@ -267,7 +266,29 @@
         </paper-menu-button>
       </app-toolbar>
       <div class="card-content">
-        <div class="summary">The market is filled with sounds, and sights, and smells.  A sweet aroma of fresh pears lingers in the air, but it is pressed against a sensory overload of a street filled with exotic food, wares, and people.</div>
+        <iron-collapse id="detailSummary1" class="summary">You've been invited to participate in Lord Tayspire's festival at Fellpines!  Rumor has spread that the wealthy Lord is sinking a small fortune into the party and any and all are invited to attend.  Although you are keen to start your adventuring, you decide to take this opportunity to rest and enjoy the festivities.  You may even be able to find some exotic equipment or seek out a traveling noble or merchant in need of some mercenary work.Upon entering the town of Fellpines, a small and presumably typically quite town now filled with hustle, laughter, and foreign travelers.  Merchants with caravans and small unfolded shops are bunched together against the street's edge, and a crowd of people all crammed together wander with the flow of troubled water from one stall to the next.</iron-collapse>
+      </div>
+    </paper-card>
+
+    <paper-card image="http://d226oxd1fw0z1k.cloudfront.net/wp-content/uploads/2016/02/star-wars-land-marketplace-concept-art-2.jpg">
+      <!-- <div class="header">
+        Prophecy of the bloodmoon god
+      </div> -->
+      <app-toolbar>
+        <div main-title>Village Market</div>
+        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="imageSummary1"></paper-icon-button>
+        <paper-menu-button dynamic-align="true">
+          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+          <paper-listbox slot="dropdown-content">
+            <paper-icon-item name="page">
+              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+              Edit Image
+            </paper-icon-item>
+          </paper-listbox>
+        </paper-menu-button>
+      </app-toolbar>
+      <div class="card-content">
+        <iron-collapse id="imageSummary1" class="summary">The market is filled with sounds, and sights, and smells.  A sweet aroma of fresh pears lingers in the air, but it is pressed against a sensory overload of a street filled with exotic food, wares, and people.</iron-collapse>
       </div>
       <div class="card-actions">
         <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
@@ -279,6 +300,17 @@
   <script>
     class SrPageApp extends Polymer.Element {
       static get is() { return 'sr-page-app'; }
+
+      toggleExpand() {
+        var iconButton = Polymer.dom(event).localTarget;
+        var summaryId = iconButton.getAttribute('target-summary');
+        if (this.$[summaryId].opened) {
+          iconButton.icon = 'sr-icons:expand-more';
+        } else {
+          iconButton.icon = 'sr-icons:expand-less';
+        }
+        this.$[summaryId].toggle();
+      }
     }
 
     window.customElements.define(SrPageApp.is, SrPageApp);
