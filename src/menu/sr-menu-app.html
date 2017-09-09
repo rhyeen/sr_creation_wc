@@ -31,7 +31,9 @@
 
 <link rel="lazy-import" href="../account/sr-account-app.html">
 <link rel="lazy-import" href="../page/sr-page-app.html">
+<link rel="lazy-import" href="../page/sr-edit-page-content-view.html">
 <link rel="lazy-import" href="../settings/sr-settings-app.html">
+<link rel="lazy-import" href="../bookmark/sr-bookmark-app.html">
 
 <dom-module id="sr-menu-app">
   <template>
@@ -127,11 +129,15 @@
           <!-- <paper-item name="page">Pages</paper-item>
           <paper-item name="account">Account</paper-item>
           <paper-item name="settings">Settings</paper-item> -->
-          <paper-icon-item name="page">
+          <paper-icon-item name="viewPage">
             <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
             Pages
           </paper-icon-item>
-          <paper-icon-item name="page">
+          <paper-icon-item name="editPage">
+            <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
+            Edit Page
+          </paper-icon-item>
+          <paper-icon-item name="bookmark">
             <iron-icon icon="sr-icons:bookmark" slot="item-icon"></iron-icon>
             Bookmarks
           </paper-icon-item>
@@ -163,6 +169,10 @@
               <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
               <paper-listbox slot="dropdown-content">
                 <paper-icon-item name="page">
+                  <iron-icon icon="sr-icons:page-add" slot="item-icon"></iron-icon>
+                  New page
+                </paper-icon-item>
+                <paper-icon-item name="page">
                   <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
                   Delete page
                 </paper-icon-item>
@@ -174,9 +184,11 @@
         <iron-pages
             selected="[[page]]"
             attr-for-selected="name"
-            fallback-selection="page"
+            fallback-selection="viewPage"
             role="main">
-          <sr-page-app name="page"></sr-page-app>
+          <sr-page-app name="viewPage"></sr-page-app>
+          <sr-edit-page-content-view name="editPage"></sr-edit-page-content-view>
+          <sr-bookmark-app name="bookmark"></sr-bookmark-app>
           <sr-account-app name="account"></sr-account-app>
           <sr-settings-app name="settings"></sr-settings-app>
         </iron-pages>
@@ -236,20 +248,24 @@
 
       _resolvePage(page) {
         var validPages = [
-          'page',
+          'viewPage',
+          'editPage',
+          'bookmark',
           'account',
           'settings'
         ];
         if (validPages.indexOf(page) === -1) {
-          this.set('route.path', '/page');
-          return 'page';
+          this.set('route.path', '/viewPage');
+          return 'viewPage';
         }
         return page;
       }
 
       _pageChanged(page) {
         var resolveUrlMap = {
-          'page': '../page/sr-page-app.html',
+          viewPage: '../page/sr-page-app.html',
+          editPage: '../page/sr-edit-page-content-view.html',
+          bookmark: '../bookmark/sr-bookmark-app.html',
           account: '../account/sr-account-app.html',
           settings: '../settings/sr-settings-app.html',
         };
@@ -267,7 +283,7 @@
        * so instead we are guaranting page is always what we expect it to be.
        */
       _showMainPage() {
-        this.page = 'page';
+        this.page = 'viewPage';
       }
     }
 

@@ -2,11 +2,11 @@
   "entrypoint": "index.html",
   "shell": "src/sr-app.html",
   "fragments": [
-    "src/account/account-app.html",
-    "src/page/page-app.html",
-    "src/settings/settings-app.html",
-    "src/view404.html",
-    "src/menu/menu-app.html"
+    "src/account/sr-account-app.html",
+    "src/page/sr-page-app.html",
+    "src/page/sr-edit-page-content-view.html",
+    "src/settings/sr-settings-app.html",
+    "src/menu/sr-menu-app.html"
   ],
   "sources": [
     "src/**/*",
