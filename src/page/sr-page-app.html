@@ -23,7 +23,7 @@
 
 <dom-module id="sr-page-app">
   <template>
-    <style include="shared-styles iron-flex">
+    <style include="shared-styles iron-flex iron-flex-alignment">
       :host {
         /*display: flex;
         align-items: center;
@@ -48,7 +48,7 @@
       }
 
       .property {
-        border-top: 1px solid var(--divider-color);
+        border-top: 1px solid #eee;
         padding: 5px 16px;
         position:relative;
         line-height: 30px;
@@ -58,10 +58,31 @@
         font-weight: 700;
       }
 
+      .related-pages paper-item,
       .details paper-item {
+        /*margin: 0 -16px;
+        padding: 0 16px;*/
+        border-top: 1px solid var(--divider-color);
         @apply(--paper-font-button);
         text-transform: none;
         font-size: 18px;
+      }
+
+      .related-pages,
+      .details {
+        margin-top: 20px;
+      }
+
+      .amount {
+        opacity: 0.4;
+        letter-spacing: 0.020em;
+        font-weight: 200;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .amount iron-icon {
+        width: 32px;
       }
 
       paper-badge {
@@ -75,6 +96,10 @@
 
       paper-item .title {
         min-width: 100px;
+      }
+
+      paper-button iron-icon {
+        margin-right: 10px;
       }
     </style>
 <!--     <div class="box">
@@ -95,16 +120,8 @@
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
           <paper-listbox slot="dropdown-content">
             <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
-              Pages
-            </paper-icon-item>
-            <paper-icon-item name="account">
-              <iron-icon icon="sr-icons:account-circle" slot="item-icon"></iron-icon>
-              Account
-            </paper-icon-item>
-            <paper-icon-item name="settings">
-              <iron-icon icon="sr-icons:settings" slot="item-icon"></iron-icon>
-              Settings
+              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+              Edit Summary
             </paper-icon-item>
           </paper-listbox>
         </paper-menu-button>
@@ -129,19 +146,21 @@
             <span class="property-value">3-6</span>
           </div>
         </div>
+
       </div>
-      <div class="card-actions">
-        <div class="details">
+      <div class="details">
           <paper-item>
-            <div class="title" id="details-detail">Details</div>
             <paper-badge for="details-detail" label="0"></paper-badge>
+            <div class="title" id="details-detail">Details</div>
           </paper-item>
           <paper-item>
             <div class="title" id="details-image">Images</div>
             <paper-badge for="details-image" label="5+"></paper-badge>
           </paper-item>
         </div>
-      </div>
+      <!-- <div class="card-actions">
+        
+      </div> -->
     </paper-card>
 
     <paper-card>
@@ -151,47 +170,108 @@
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
           <paper-listbox slot="dropdown-content">
             <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
-              Pages
+              <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
+              Add related pages
             </paper-icon-item>
             <paper-icon-item name="account">
-              <iron-icon icon="sr-icons:account-circle" slot="item-icon"></iron-icon>
-              Account
-            </paper-icon-item>
-            <paper-icon-item name="settings">
-              <iron-icon icon="sr-icons:settings" slot="item-icon"></iron-icon>
-              Settings
+              <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
+              Set related pages
             </paper-icon-item>
           </paper-listbox>
         </paper-menu-button>
       </app-toolbar>
+      <div class="related-pages">
+        <paper-item>
+          <div class="title" id="related-page-quest">Quests</div>
+          <paper-badge for="related-page-quest" label="15"></paper-badge>
+        </paper-item>
+        <paper-item>
+          <div class="title" id="related-page-world">Worlds</div>
+          <paper-badge for="related-page-world" label="15"></paper-badge>
+        </paper-item>
+        <paper-item>
+          <div class="title" id="related-page-group">Groups</div>
+          <paper-badge for="related-page-group" label="15"></paper-badge>
+        </paper-item>
+        <paper-item>
+          <div class="title" id="related-page-era">Eras</div>
+          <paper-badge for="related-page-era" label="15"></paper-badge>
+        </paper-item>
+        <paper-item>
+          <div class="title" id="related-page-taxon">Taxons</div>
+          <paper-badge for="related-page-taxon" label="15"></paper-badge>
+        </paper-item>
+        <paper-item>
+          <div class="title" id="related-page-set">Sets</div>
+          <paper-badge for="related-page-set" label="15"></paper-badge>
+        </paper-item>
+        <!-- <paper-item>
+          <div class="title">Quests</div>
+          <div class="amount">
+            <iron-icon icon="sr-icons:file"></iron-icon>
+            15
+          </div>
+        </paper-item>
+        <paper-item>
+          <div class="title">Worlds</div>
+          <div class="amount">
+            <iron-icon icon="sr-icons:file"></iron-icon>
+            15
+          </div>
+        </paper-item>
+        <paper-item>
+          <div class="title">Groups</div>
+          <div class="amount">
+            <iron-icon icon="sr-icons:file"></iron-icon>
+            15
+          </div>
+        </paper-item>
+        <paper-item>
+          <div class="title">Eras</div>
+          <div class="amount">
+            <iron-icon icon="sr-icons:file"></iron-icon>
+            15
+          </div>
+        </paper-item>
+        <paper-item>
+          <div class="title">Taxons</div>
+          <div class="amount">
+            <iron-icon icon="sr-icons:file"></iron-icon>
+            15
+          </div>
+        </paper-item>
+        <paper-item>
+          <div class="title">Sets</div>
+          <div class="amount">
+            <iron-icon icon="sr-icons:file"></iron-icon>
+            15
+          </div>
+        </paper-item> -->
+      </div>
+    </paper-card>
+
+    <paper-card image="http://d226oxd1fw0z1k.cloudfront.net/wp-content/uploads/2016/02/star-wars-land-marketplace-concept-art-2.jpg">
+      <!-- <div class="header">
+        Prophecy of the bloodmoon god
+      </div> -->
+      <app-toolbar>
+        <div main-title>Village Market</div>
+        <paper-menu-button dynamic-align="true">
+          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+          <paper-listbox slot="dropdown-content">
+            <paper-icon-item name="page">
+              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+              Edit Image
+            </paper-icon-item>
+          </paper-listbox>
+        </paper-menu-button>
+      </app-toolbar>
+      <div class="card-content">
+        <div class="summary">The market is filled with sounds, and sights, and smells.  A sweet aroma of fresh pears lingers in the air, but it is pressed against a sensory overload of a street filled with exotic food, wares, and people.</div>
+      </div>
       <div class="card-actions">
-        <div class="details">
-          <paper-item>
-            <div class="title" id="related-page-quest">Quests</div>
-            <paper-badge for="related-page-quest" label="15"></paper-badge>
-          </paper-item>
-          <paper-item>
-            <div class="title" id="related-page-world">Worlds</div>
-            <paper-badge for="related-page-world" label="15"></paper-badge>
-          </paper-item>
-          <paper-item>
-            <div class="title" id="related-page-group">Groups</div>
-            <paper-badge for="related-page-group" label="15"></paper-badge>
-          </paper-item>
-          <paper-item>
-            <div class="title" id="related-page-era">Eras</div>
-            <paper-badge for="related-page-era" label="15"></paper-badge>
-          </paper-item>
-          <paper-item>
-            <div class="title" id="related-page-taxon">Taxons</div>
-            <paper-badge for="related-page-taxon" label="15"></paper-badge>
-          </paper-item>
-          <paper-item>
-            <div class="title" id="related-page-set">Sets</div>
-            <paper-badge for="related-page-set" label="15"></paper-badge>
-          </paper-item>
-        </div>
+        <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
+        <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
       </div>
     </paper-card>
   </template>

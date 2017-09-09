@@ -83,9 +83,9 @@
         font-weight: bold;
       }*/
 
-      paper-listbox {
+     /* paper-listbox {
         min-width: 175px;
-      }
+      }*/
 
       paper-icon-item { 
         /*--paper-item-icon-width: 36px;*/
@@ -117,7 +117,7 @@
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <app-toolbar>
-          <div main-title>SR Creation</div>
+          <div main-title>Main Menu</div>
           <paper-icon-button icon="sr-icons:close" drawer-toggle></paper-icon-button>
         </app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -130,6 +130,10 @@
           <paper-icon-item name="page">
             <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
             Pages
+          </paper-icon-item>
+          <paper-icon-item name="page">
+            <iron-icon icon="sr-icons:bookmark" slot="item-icon"></iron-icon>
+            Bookmarks
           </paper-icon-item>
           <paper-icon-item name="account">
             <iron-icon icon="sr-icons:account-circle" slot="item-icon"></iron-icon>
@@ -148,27 +152,18 @@
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="sr-icons:menu" drawer-toggle></paper-icon-button>
-            <!-- <div main-title>SR Creation</div> -->
             <div main-title>SR Creation</div>
           </app-toolbar>
           <!-- <div class="page-title" sticky>Prophecy of the Bloodmoon God</div> -->
           <app-toolbar class="page-title" sticky>
-            <!-- <div main-title>SR Creation</div> -->
             <div main-title>Prophecy of the Bloodmoon God</div>
+            <paper-icon-button icon="sr-icons:search" on-tap="toggleSearchDialog"></paper-icon-button>
             <paper-menu-button dynamic-align="true">
               <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
               <paper-listbox slot="dropdown-content">
                 <paper-icon-item name="page">
-                  <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
-                  Pages
-                </paper-icon-item>
-                <paper-icon-item name="account">
-                  <iron-icon icon="sr-icons:account-circle" slot="item-icon"></iron-icon>
-                  Account
-                </paper-icon-item>
-                <paper-icon-item name="settings">
-                  <iron-icon icon="sr-icons:settings" slot="item-icon"></iron-icon>
-                  Settings
+                  <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                  Delete page
                 </paper-icon-item>
               </paper-listbox>
             </paper-menu-button>
@@ -186,6 +181,16 @@
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
+    <paper-dialog id="searchDialog" modal>
+      <h2>Header</h2>
+      <paper-dialog-scrollable>
+        Lorem ipsum...
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Accept</paper-button>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -224,8 +229,8 @@
         }
       }
 
-      toggleDialog() {
-        this.$.dialog.toggle();
+      toggleSearchDialog() {
+        this.$.searchDialog.toggle();
       }
 
       _resolvePage(page) {
