@@ -1,0 +1,168 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sr-related-pages-view">
+  <template>
+    <style>
+      .summary {
+        margin-bottom: 15px;
+      }
+
+      .property {
+        border-top: 1px solid #eee;
+        padding: 5px 16px;
+        position:relative;
+        line-height: 30px;
+      }
+
+      .property-title {
+        font-weight: 700;
+      }
+
+      .details {
+        margin-top: 20px;
+      }
+
+      .related-pages {
+        margin-top: 20px;
+      }
+
+      paper-badge {
+        --paper-badge-margin-left: 50px;
+        --paper-badge-margin-bottom: -30px;
+        --paper-badge-background: #eee;
+        --paper-badge-text-color: var(--secondary-text-color);
+        --paper-badge-width: 25px;
+        --paper-badge-height: 25px;
+      }
+
+      paper-item .title {
+        min-width: 100px;
+        text-transform: capitalize;
+      }
+
+      paper-button iron-icon {
+        margin-right: 10px;
+      }
+
+      paper-card {
+        margin: 10px;
+        max-width: 500px;
+        width: calc(100% - 20px);
+      }
+
+      paper-item {
+        /*margin: 0 -16px;
+        padding: 0 16px;*/
+        border-top: 1px solid var(--divider-color);
+        @apply(--paper-font-button);
+        text-transform: none;
+        font-size: 18px;
+      }
+    </style>
+    <paper-card>
+      <app-toolbar>
+        <div main-title>Related Pages</div>
+        <paper-menu-button dynamic-align="true">
+          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+          <paper-listbox slot="dropdown-content">
+            <paper-icon-item name="page">
+              <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
+              Add related pages
+            </paper-icon-item>
+            <paper-icon-item name="account">
+              <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
+              Set related pages
+            </paper-icon-item>
+          </paper-listbox>
+        </paper-menu-button>
+      </app-toolbar>
+      <template is="dom-if" if="{{showRelatedPages(page)}}">
+        <div class="related-pages">
+          <template is="dom-repeat" items="{{page.pages}}">
+            <paper-item>
+              <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
+              <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
+            </paper-item>
+          </template>
+        </div>
+      </template>
+    </paper-card>
+  </template>
+  <script>
+    class SrRelatedPagesView extends Polymer.Element {
+      static get is() { return 'sr-related-pages-view'; }
+
+      static get properties() {
+        return {
+          page: {
+            notify: true,
+            readOnly: false,
+          }
+        };
+      }
+
+      showRelatedPages(page) {
+        return !!page && !!page.pages && page.pages.length;
+      }
+
+      getRelatedPageId(relatedPage) {
+        return "relatedPage" + relatedPage.type;
+      }
+
+      getRelatedPageName(relatedPage) {
+        switch (relatedPage.type) {
+          case 'AS':
+            return 'associations';
+          case 'CA':
+            return 'campaigns';
+          case 'CH':
+            return 'characters';
+          case 'DI':
+            return 'districts';
+          case 'EA':
+            return 'eras';
+          case 'EV':
+            return 'events';
+          case 'GR':
+            return 'groups';
+          case 'HI':
+            return 'histories';
+          case 'IT':
+            return 'items';
+          case 'LM':
+            return 'landmarks';
+          case 'LR':
+            return 'lores';
+          case 'PL':
+            return 'places';
+          case 'QU':
+            return 'quests';
+          case 'RA':
+            return 'races';
+          case 'RG':
+            return 'regions';
+          case 'RP':
+            return 'reports';
+          case 'SE':
+            return 'sections';
+          case 'ST':
+            return 'sets';
+          case 'SP':
+            return 'species';
+          case 'SA':
+            return 'story arcs';
+          case 'TX':
+            return 'taxons';
+          case 'WD':
+            return 'worlds';
+          default:
+            return null;
+        }
+      }
+    }
+
+    window.customElements.define(SrRelatedPagesView.is, SrRelatedPagesView);
+  </script>
+</dom-module>

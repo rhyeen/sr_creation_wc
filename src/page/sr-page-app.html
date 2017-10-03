@@ -11,9 +11,11 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 
 
 <link rel="import" href="../page/sr-summary-view.html">
+<link rel="import" href="../page/sr-related-pages-view.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../tools/sr-icons.html">
@@ -36,54 +38,13 @@
         width: calc(100% - 20px);
       }
 
-      .header {
-        padding: 16px;
-        font-size: 24px;
-        font-weight: 400;
-        color: var(--paper-card-header-color, #000);
-        @apply --paper-card-header-text;
-      }
-
-      .summary {
-        margin-bottom: 15px;
-      }
-
-      .property {
-        border-top: 1px solid #eee;
-        padding: 5px 16px;
-        position:relative;
-        line-height: 30px;
-      }
-
-      .property-title {
-        font-weight: 700;
-      }
-
-      .related-pages paper-item,
-      .details paper-item {
+      paper-item {
         /*margin: 0 -16px;
         padding: 0 16px;*/
         border-top: 1px solid var(--divider-color);
         @apply(--paper-font-button);
         text-transform: none;
         font-size: 18px;
-      }
-
-      .related-pages,
-      .details {
-        margin-top: 20px;
-      }
-
-      .amount {
-        opacity: 0.4;
-        letter-spacing: 0.020em;
-        font-weight: 200;
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-      }
-
-      .amount iron-icon {
-        width: 32px;
       }
 
       paper-badge {
@@ -97,159 +58,16 @@
 
       paper-item .title {
         min-width: 100px;
+        text-transform: capitalize;
       }
 
       paper-button iron-icon {
         margin-right: 10px;
       }
     </style>
-<!--     <div class="box">
-      <sr-summary-view></sr-summary-view>
-      <div class="card">
-        <h1>View One</h1>
-        <p>Ut labores minimum atomorum pro. Laudem tibique ut has.</p>
-        <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
-      </div>
-    </div> -->
-    <paper-card>
-      <!-- <div class="header">
-        Prophecy of the bloodmoon god
-      </div> -->
-      <app-toolbar>
-        <div main-title>Prophecy of the Bloodmoon God</div>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-              Edit Summary
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="card-content">
-        <div class="summary">Traveling to a festival, your party's destiny is sealed by the prophecy of a fortune teller. She speaks of a blood stone, four maidens, and a ritual of death and immortality. Can you stop the red demon before he becomes the bloodmoon god?</div>
-        <div class="properties">
-          <div class="property">
-            <span class="property-title">Length:</span>
-            <span class="property-value">6-10 3-hour sessions</span>
-          </div>
-          <div class="property">
-            <span class="property-title">Starting level:</span>
-            <span class="property-value">1</span>
-          </div>
-          <div class="property">
-            <span class="property-title">Expected ending level:</span>
-            <span class="property-value">4</span>
-          </div>
-          <div class="property">
-            <span class="property-title">Expected number of players:</span>
-            <span class="property-value">3-6</span>
-          </div>
-        </div>
 
-      </div>
-      <div class="details">
-          <paper-item>
-            <paper-badge for="details-detail" label="0"></paper-badge>
-            <div class="title" id="details-detail">Details</div>
-          </paper-item>
-          <paper-item>
-            <div class="title" id="details-image">Images</div>
-            <paper-badge for="details-image" label="5+"></paper-badge>
-          </paper-item>
-        </div>
-      <!-- <div class="card-actions">
-        
-      </div> -->
-    </paper-card>
-
-    <paper-card>
-      <app-toolbar>
-        <div main-title>Related Pages</div>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
-              Add related pages
-            </paper-icon-item>
-            <paper-icon-item name="account">
-              <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
-              Set related pages
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="related-pages">
-        <paper-item>
-          <div class="title" id="related-page-quest">Quests</div>
-          <paper-badge for="related-page-quest" label="15"></paper-badge>
-        </paper-item>
-        <paper-item>
-          <div class="title" id="related-page-world">Worlds</div>
-          <paper-badge for="related-page-world" label="15"></paper-badge>
-        </paper-item>
-        <paper-item>
-          <div class="title" id="related-page-group">Groups</div>
-          <paper-badge for="related-page-group" label="15"></paper-badge>
-        </paper-item>
-        <paper-item>
-          <div class="title" id="related-page-era">Eras</div>
-          <paper-badge for="related-page-era" label="15"></paper-badge>
-        </paper-item>
-        <paper-item>
-          <div class="title" id="related-page-taxon">Taxons</div>
-          <paper-badge for="related-page-taxon" label="15"></paper-badge>
-        </paper-item>
-        <paper-item>
-          <div class="title" id="related-page-set">Sets</div>
-          <paper-badge for="related-page-set" label="15"></paper-badge>
-        </paper-item>
-        <!-- <paper-item>
-          <div class="title">Quests</div>
-          <div class="amount">
-            <iron-icon icon="sr-icons:file"></iron-icon>
-            15
-          </div>
-        </paper-item>
-        <paper-item>
-          <div class="title">Worlds</div>
-          <div class="amount">
-            <iron-icon icon="sr-icons:file"></iron-icon>
-            15
-          </div>
-        </paper-item>
-        <paper-item>
-          <div class="title">Groups</div>
-          <div class="amount">
-            <iron-icon icon="sr-icons:file"></iron-icon>
-            15
-          </div>
-        </paper-item>
-        <paper-item>
-          <div class="title">Eras</div>
-          <div class="amount">
-            <iron-icon icon="sr-icons:file"></iron-icon>
-            15
-          </div>
-        </paper-item>
-        <paper-item>
-          <div class="title">Taxons</div>
-          <div class="amount">
-            <iron-icon icon="sr-icons:file"></iron-icon>
-            15
-          </div>
-        </paper-item>
-        <paper-item>
-          <div class="title">Sets</div>
-          <div class="amount">
-            <iron-icon icon="sr-icons:file"></iron-icon>
-            15
-          </div>
-        </paper-item> -->
-      </div>
-    </paper-card>
+    <sr-summary-view page="{{page}}"></sr-summary-view>
+    <sr-related-pages-view page="{{page}}"></sr-related-pages-view>
 
     <paper-card>
       <app-toolbar>
@@ -295,11 +113,35 @@
         <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
       </div>
     </paper-card>
+    <iron-ajax
+        auto
+        url="http://localhost:4000/user/page"
+        params='{"id":"CA_2MLJEe0YuQrLt"}'
+        handle-as="json"
+        on-response="handleGetPage"
+        debounce-duration="300"></iron-ajax>
   </template>
 
   <script>
     class SrPageApp extends Polymer.Element {
       static get is() { return 'sr-page-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            notify: true,
+            readOnly: false,
+          }
+        };
+      }
+
+      // constructor() {
+      //   super();
+      //   this.page = {
+      //     name: 'Test'
+      //   };
+      //   debugger;
+      // }
 
       toggleExpand() {
         var iconButton = Polymer.dom(event).localTarget;
@@ -310,6 +152,16 @@
           iconButton.icon = 'sr-icons:expand-less';
         }
         this.$[summaryId].toggle();
+      }
+
+      handleGetPage(event) {
+        this.setPage(event.detail.response);
+      }
+
+      setPage(page) {
+        this.page = page;
+        // debugger;
+        console.log(page);
       }
     }
 

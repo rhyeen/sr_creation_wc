@@ -4,21 +4,123 @@
 
 <dom-module id="sr-summary-view">
   <template>
-    <style include="shared-styles">
-      :host {
-        display: block;
+    <style>
+      .summary {
+        margin-bottom: 15px;
+      }
+
+      .property {
+        border-top: 1px solid #eee;
+        padding: 5px 16px;
+        position:relative;
+        line-height: 30px;
+      }
+
+      .property-title {
+        font-weight: 700;
+      }
+
+      .details {
+        margin-top: 20px;
+      }
+
+      paper-badge {
+        --paper-badge-margin-left: 50px;
+        --paper-badge-margin-bottom: -30px;
+        --paper-badge-background: #eee;
+        --paper-badge-text-color: var(--secondary-text-color);
+        --paper-badge-width: 25px;
+        --paper-badge-height: 25px;
+      }
+
+      paper-item .title {
+        min-width: 100px;
+        text-transform: capitalize;
+      }
+
+      paper-button iron-icon {
+        margin-right: 10px;
+      }
+
+      paper-card {
+        margin: 10px;
+        max-width: 500px;
+        width: calc(100% - 20px);
+      }
+
+      paper-item {
+        /*margin: 0 -16px;
+        padding: 0 16px;*/
+        border-top: 1px solid var(--divider-color);
+        @apply(--paper-font-button);
+        text-transform: none;
+        font-size: 18px;
       }
     </style>
-    <div class="card">
-      <h1>Summary</h1>
-      <p>Stuff</p>
-      <p>Stuff 2</p>
-    </div>
+    <paper-card>
+      <!-- <div class="header">
+        Prophecy of the bloodmoon god
+      </div> -->
+      <app-toolbar>
+        <div main-title>[[page.name]]</div>
+        <paper-menu-button dynamic-align="true">
+          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+          <paper-listbox slot="dropdown-content">
+            <paper-icon-item name="page">
+              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+              Edit Summary
+            </paper-icon-item>
+          </paper-listbox>
+        </paper-menu-button>
+      </app-toolbar>
+      <div class="card-content">
+        <div class="summary">[[page.summary.text]]</div>
+        <div class="properties">
+          <template is="dom-repeat" items="{{page.summary.properties}}">
+            <div class="property">
+              <span class="property-title">[[item.key]]:</span>
+              <span class="property-value">[[item.value]]</span>
+            </div>
+          </template>
+        </div>
+      </div>
+      <template is="dom-if" if="{{showDetails(page)}}">
+        <div class="details">
+            <template is="dom-if" if="{{page.details.list}}">
+              <paper-item>
+                <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
+                <div class="title" id="details-detail">Details</div>
+              </paper-item>
+            </template>
+            <template is="dom-if" if="{{page.images.list}}">
+              <paper-item>
+                <div class="title" id="details-image">Images</div>
+                <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>
+              </paper-item>
+            </template>
+          </div>
+      </template>
+      <!-- <div class="card-actions">
+        
+      </div> -->
+    </paper-card>
   </template>
-
   <script>
     class SrSummaryView extends Polymer.Element {
       static get is() { return 'sr-summary-view'; }
+
+      static get properties() {
+        return {
+          page: {
+            notify: true,
+            readOnly: false,
+          }
+        };
+      }
+
+      showDetails(page) {
+        return !!page && (!!page.details || !!page.images);
+      }
     }
 
     window.customElements.define(SrSummaryView.is, SrSummaryView);
