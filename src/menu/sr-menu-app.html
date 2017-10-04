@@ -55,66 +55,14 @@
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
-
-      /*app-header app-toolbar {
-        padding-bottom: 20px;
-      }*/
-
-      /*.page-title {
-        @apply(--paper-font-headline);
-        padding: 0 25px;
-        color: white;
-        font-weight: 500;
-        line-height: 60px
-      }*/
-
-/*      .drawer-list {
-        margin: 0 20px;
-      }*/
-
-      /*.drawer-list a {
-        display: block;
-        padding: 0 16px;
-        text-decoration: none;
-        color: var(--app-primary-color);
-        line-height: 40px;
-      }
-
-      .drawer-list a.iron-selected {
-        color: var(--app-primary-color);
-        font-weight: bold;
-      }*/
-
-     /* paper-listbox {
-        min-width: 175px;
-      }*/
-
-      paper-icon-item { 
-        /*--paper-item-icon-width: 36px;*/
-      }
-
-/*      :host {
-        --paper-item-icon: {
-          width: 10px;
-          height: 10px;
-          background-color: blue;
-        };*/
-
-        /*--paper-icon-item: {*/
-          /*background-color: red;*/
-          /*@apply(--layout-start-justified);*/
-          /*@apply(--layout-center-justified);*/
-        /*};*/
-      } 
-      
     </style>
 
-    <app-location route="{{route}}" url-space-regex="^[[rootPath]]"></app-location>
+    <app-location route="{{route}}"></app-location>
     <app-route
         route="{{route}}"
-        pattern="[[rootPath]]:page"
+        pattern="/:viewWindow"
         data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
+        tail="{{subRoute}}"></app-route>
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
@@ -122,21 +70,15 @@
           <div main-title>Main Menu</div>
           <paper-icon-button icon="sr-icons:close" drawer-toggle></paper-icon-button>
         </app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-<!--           <a name="page" href="[[rootPath]]page">Pages</a>
-          <a name="account" href="[[rootPath]]account">Account</a>
-          <a name="settings" href="[[rootPath]]settings">Settings</a> -->
-          <!-- <paper-item name="page">Pages</paper-item>
-          <paper-item name="account">Account</paper-item>
-          <paper-item name="settings">Settings</paper-item> -->
-          <paper-icon-item name="viewPage">
+        <iron-selector selected="{{viewWindow}}" attr-for-selected="name" class="drawer-list" role="navigation">
+          <paper-icon-item name="page">
             <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
             Pages
           </paper-icon-item>
-          <paper-icon-item name="editPage">
+<!--           <paper-icon-item name="editPage">
             <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
             Edit Page
-          </paper-icon-item>
+          </paper-icon-item> -->
           <paper-icon-item name="bookmark">
             <iron-icon icon="sr-icons:bookmark" slot="item-icon"></iron-icon>
             Bookmarks
@@ -168,11 +110,11 @@
             <paper-menu-button dynamic-align="true">
               <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
               <paper-listbox slot="dropdown-content">
-                <paper-icon-item name="page">
+                <paper-icon-item name="newPage">
                   <iron-icon icon="sr-icons:page-add" slot="item-icon"></iron-icon>
                   New page
                 </paper-icon-item>
-                <paper-icon-item name="page">
+                <paper-icon-item name="deletePage">
                   <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
                   Delete page
                 </paper-icon-item>
@@ -182,12 +124,12 @@
         </app-header>
 
         <iron-pages
-            selected="[[page]]"
+            selected="[[viewWindow]]"
             attr-for-selected="name"
-            fallback-selection="viewPage"
+            fallback-selection="page"
             role="main">
-          <sr-page-app name="viewPage"></sr-page-app>
-          <sr-edit-page-content-view name="editPage"></sr-edit-page-content-view>
+          <sr-page-app name="page" route="[[subRoute]]"></sr-page-app>
+          <!-- <sr-edit-page-content-view name="editPage"></sr-edit-page-content-view> -->
           <sr-bookmark-app name="bookmark"></sr-bookmark-app>
           <sr-account-app name="account"></sr-account-app>
           <sr-settings-app name="settings"></sr-settings-app>
@@ -212,33 +154,30 @@
 
       static get properties() {
         return {
-          page: {
+          viewWindow: {
             type: String,
             reflectToAttribute: true,
-            observer: '_pageChanged',
+            observer: '_windowChanged',
           },
           routeData: Object,
-          subroute: String,
-          // This shouldn't be neccessary, but the Analyzer isn't picking up
-          // Polymer.Element#rootPath
-          rootPath: String,
+          subRoute: String
         };
       }
 
       static get observers() {
         return [
-          '_routePageChanged(routeData.page)',
+          '_routeDataChanged(routeData.viewWindow)',
         ];
       }
 
-      _routePageChanged(page) {
-        // If no page was found in the route data, page will be an empty string.
-        // Deault to 'pages' in that case.
-        this.page = this._resolvePage(page);
-
+      _windowChanged(viewWindow) {
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
+        }
+        if (this.routeData.viewWindow != viewWindow) {
+          this.set('routeData.viewWindow', viewWindow);
+          // this._routeDataChanged(viewWindow);
         }
       }
 
@@ -246,44 +185,43 @@
         this.$.searchDialog.toggle();
       }
 
-      _resolvePage(page) {
+      _resolvePage(viewWindow) {
         var validPages = [
-          'viewPage',
-          'editPage',
+          'page',
           'bookmark',
           'account',
           'settings'
         ];
-        if (validPages.indexOf(page) === -1) {
-          this.set('route.path', '/viewPage');
-          return 'viewPage';
+        if (validPages.indexOf(viewWindow) === -1) {
+          this.set('route.path', '/page');
+          return 'page';
         }
-        return page;
+        return viewWindow;
       }
 
-      _pageChanged(page) {
+      _routeDataChanged(viewWindow) {
+        viewWindow = this._resolvePage(viewWindow);
         var resolveUrlMap = {
-          viewPage: '../page/sr-page-app.html',
-          editPage: '../page/sr-edit-page-content-view.html',
+          page: '../page/sr-page-app.html',
           bookmark: '../bookmark/sr-bookmark-app.html',
           account: '../account/sr-account-app.html',
           settings: '../settings/sr-settings-app.html',
         };
         
-        var resolvedPageUrl = this.resolveUrl(resolveUrlMap[page]);
+        var resolvedPageUrl = this.resolveUrl(resolveUrlMap[viewWindow]);
         Polymer.importHref(
             resolvedPageUrl,
             null,
-            this._showMainPage.bind(this),
+            this._showMainWindow.bind(this),
             true);
       }
 
       /**
        * @DEBUG: is not currently called, 
-       * so instead we are guaranting page is always what we expect it to be.
+       * so instead we are guaranting viewWindow is always what we expect it to be.
        */
-      _showMainPage() {
-        this.page = 'viewPage';
+      _showMainWindow() {
+        this.viewWindow = 'page';
       }
     }
 

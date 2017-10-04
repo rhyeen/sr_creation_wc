@@ -32,91 +32,18 @@
         align-items: center;
         justify-content: center;*/
       }
-      paper-card {
-        margin: 10px;
-        max-width: 500px;
-        width: calc(100% - 20px);
-      }
-
-      paper-item {
-        /*margin: 0 -16px;
-        padding: 0 16px;*/
-        border-top: 1px solid var(--divider-color);
-        @apply(--paper-font-button);
-        text-transform: none;
-        font-size: 18px;
-      }
-
-      paper-badge {
-        --paper-badge-margin-left: 50px;
-        --paper-badge-margin-bottom: -30px;
-        --paper-badge-background: #eee;
-        --paper-badge-text-color: var(--secondary-text-color);
-        --paper-badge-width: 25px;
-        --paper-badge-height: 25px;
-      }
-
-      paper-item .title {
-        min-width: 100px;
-        text-transform: capitalize;
-      }
-
-      paper-button iron-icon {
-        margin-right: 10px;
-      }
     </style>
+    <app-route
+        route="[[route]]"
+        pattern="/:pageId"
+        data="{{routeData}}"></app-route>
 
     <sr-summary-view page="{{page}}"></sr-summary-view>
     <sr-related-pages-view page="{{page}}"></sr-related-pages-view>
-
-    <paper-card>
-      <app-toolbar>
-        <div main-title>Traveling through the market</div>
-        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="detailSummary1"></paper-icon-button>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-              Edit Detail
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="card-content">
-        <iron-collapse id="detailSummary1" class="summary">You've been invited to participate in Lord Tayspire's festival at Fellpines!  Rumor has spread that the wealthy Lord is sinking a small fortune into the party and any and all are invited to attend.  Although you are keen to start your adventuring, you decide to take this opportunity to rest and enjoy the festivities.  You may even be able to find some exotic equipment or seek out a traveling noble or merchant in need of some mercenary work.Upon entering the town of Fellpines, a small and presumably typically quite town now filled with hustle, laughter, and foreign travelers.  Merchants with caravans and small unfolded shops are bunched together against the street's edge, and a crowd of people all crammed together wander with the flow of troubled water from one stall to the next.</iron-collapse>
-      </div>
-    </paper-card>
-
-    <paper-card image="http://d226oxd1fw0z1k.cloudfront.net/wp-content/uploads/2016/02/star-wars-land-marketplace-concept-art-2.jpg">
-      <!-- <div class="header">
-        Prophecy of the bloodmoon god
-      </div> -->
-      <app-toolbar>
-        <div main-title>Village Market</div>
-        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="imageSummary1"></paper-icon-button>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-              Edit Image
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="card-content">
-        <iron-collapse id="imageSummary1" class="summary">The market is filled with sounds, and sights, and smells.  A sweet aroma of fresh pears lingers in the air, but it is pressed against a sensory overload of a street filled with exotic food, wares, and people.</iron-collapse>
-      </div>
-      <div class="card-actions">
-        <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
-        <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
-      </div>
-    </paper-card>
     <iron-ajax
         auto
         url="http://localhost:4000/user/page"
-        params='{"id":"CA_2MLJEe0YuQrLt"}'
+        params="{{getPageParams}}"
         handle-as="json"
         on-response="handleGetPage"
         debounce-duration="300"></iron-ajax>
@@ -131,27 +58,20 @@
           page: {
             notify: true,
             readOnly: false,
+          },
+          routeData: Object,
+          pageId: String,
+          getPageParams: {
+            type: Object,
+            value: {}
           }
         };
       }
 
-      // constructor() {
-      //   super();
-      //   this.page = {
-      //     name: 'Test'
-      //   };
-      //   debugger;
-      // }
-
-      toggleExpand() {
-        var iconButton = Polymer.dom(event).localTarget;
-        var summaryId = iconButton.getAttribute('target-summary');
-        if (this.$[summaryId].opened) {
-          iconButton.icon = 'sr-icons:expand-more';
-        } else {
-          iconButton.icon = 'sr-icons:expand-less';
-        }
-        this.$[summaryId].toggle();
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.pageId)',
+        ];
       }
 
       handleGetPage(event) {
@@ -160,8 +80,22 @@
 
       setPage(page) {
         this.page = page;
-        // debugger;
         console.log(page);
+      }
+
+      _routeDataChanged(pageId) {
+        if (pageId != this.pageId) {
+          this.pageId = pageId;
+          this._setGetPageParams(pageId);
+        }
+      }
+
+      _setGetPageParams(pageId) {
+        var getPageParams = {};
+        if (pageId) {
+          getPageParams.id = pageId; // CA_2MLJEe0YuQrLt
+        }
+        this.set('getPageParams', getPageParams);
       }
     }
 

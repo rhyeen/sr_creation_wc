@@ -1,0 +1,60 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sr-image">
+  <template>
+    <style include="shared-styles">
+      
+    </style>
+    <paper-card image="http://d226oxd1fw0z1k.cloudfront.net/wp-content/uploads/2016/02/star-wars-land-marketplace-concept-art-2.jpg">
+      <app-toolbar>
+        <div main-title>Village Market</div>
+        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="imageSummary1"></paper-icon-button>
+        <paper-menu-button dynamic-align="true">
+          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+          <paper-listbox slot="dropdown-content">
+            <paper-icon-item name="page">
+              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+              Edit Image
+            </paper-icon-item>
+          </paper-listbox>
+        </paper-menu-button>
+      </app-toolbar>
+      <div class="card-content">
+        <iron-collapse id="imageSummary1" class="summary">The market is filled with sounds, and sights, and smells.  A sweet aroma of fresh pears lingers in the air, but it is pressed against a sensory overload of a street filled with exotic food, wares, and people.</iron-collapse>
+      </div>
+      <div class="card-actions">
+        <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
+        <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
+      </div>
+    </paper-card>
+  </template>
+  <script>
+    class SrImage extends Polymer.Element {
+      static get is() { return 'sr-image'; }
+
+      static get properties() {
+        return {
+          detail: {
+            notify: true,
+            readOnly: false,
+          }
+        };
+      }
+
+      toggleExpand() {
+        var iconButton = Polymer.dom(event).localTarget;
+        var summaryId = iconButton.getAttribute('target-summary');
+        if (this.$[summaryId].opened) {
+          iconButton.icon = 'sr-icons:expand-more';
+        } else {
+          iconButton.icon = 'sr-icons:expand-less';
+        }
+        this.$[summaryId].toggle();
+      }
+    }
+
+    window.customElements.define(SrImage.is, SrImage);
+  </script>
+</dom-module>

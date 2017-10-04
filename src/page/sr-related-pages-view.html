@@ -4,61 +4,9 @@
 
 <dom-module id="sr-related-pages-view">
   <template>
-    <style>
-      .summary {
-        margin-bottom: 15px;
-      }
-
-      .property {
-        border-top: 1px solid #eee;
-        padding: 5px 16px;
-        position:relative;
-        line-height: 30px;
-      }
-
-      .property-title {
-        font-weight: 700;
-      }
-
-      .details {
-        margin-top: 20px;
-      }
-
+    <style include="shared-styles">
       .related-pages {
         margin-top: 20px;
-      }
-
-      paper-badge {
-        --paper-badge-margin-left: 50px;
-        --paper-badge-margin-bottom: -30px;
-        --paper-badge-background: #eee;
-        --paper-badge-text-color: var(--secondary-text-color);
-        --paper-badge-width: 25px;
-        --paper-badge-height: 25px;
-      }
-
-      paper-item .title {
-        min-width: 100px;
-        text-transform: capitalize;
-      }
-
-      paper-button iron-icon {
-        margin-right: 10px;
-      }
-
-      paper-card {
-        margin: 10px;
-        max-width: 500px;
-        width: calc(100% - 20px);
-      }
-
-      paper-item {
-        /*margin: 0 -16px;
-        padding: 0 16px;*/
-        border-top: 1px solid var(--divider-color);
-        @apply(--paper-font-button);
-        text-transform: none;
-        font-size: 18px;
       }
     </style>
     <paper-card>
