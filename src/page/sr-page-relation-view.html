@@ -31,29 +31,19 @@
         return {
           contextGroup: {
             type: Object
-          },
-          context: String
+          }
         };
       }
 
       static get observers() {
         return [
-          '_routeChanged(route.path)',
-          '_routeDataChanged(routeData.context)',
+          '_routeDataChanged(routeData)',
         ];
       }
 
-      _routeChanged(path) {
-        // if back button is pressed, and routeData.context is going to be null, it won't be: instead it'll stay the same.
-        if (!path) {
-          this._routeDataChanged(null);
-        }
-      }
-
-      _routeDataChanged(context) {
-        this.set('context', context);
+      _routeDataChanged(routeData) {
+        var context = routeData.context;
         this._updateContextedItem(context);
-        // this.set('showView', !context || context == 'summary');
       }
 
       _updateContextedItem(context) {

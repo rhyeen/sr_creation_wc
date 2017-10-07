@@ -40,7 +40,7 @@
         data="{{routeData}}"
         tail="{{subRoute}}"></app-route>
     <sr-summary-view
-        route="[[subRoute]]"
+        route="{{subRoute}}"
         page="[[page]]"></sr-summary-view>
     <sr-related-pages-view
         route="[[subRoute]]"
@@ -73,6 +73,10 @@
             type: Object,
             value: {}
           },
+          route: {
+            type: Object,
+            notify: true
+          }
         };
       }
 

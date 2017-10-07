@@ -94,26 +94,29 @@
 
       static get properties() {
         return {
-          showView: Boolean
+          showView: Boolean,
+          route: {
+            type: Object,
+            notify: true
+          }
         };
       }
 
       static get observers() {
         return [
           '_routeChanged(route.path)',
-          '_routeDataChanged(routeData.context)',
+          '_routeDataChanged(routeData)',
         ];
       }
 
       _routeChanged(path) {
-        // if back button is pressed, and routeData.context is going to be null, it won't be: instead it'll stay the same.
         if (!path) {
-          this.set('routeData', {});
-          this._routeDataChanged(null);
+          this.set('route.path', '/summary');
         }
       }
 
-      _routeDataChanged(context) {
+      _routeDataChanged(routeData) {
+        var context = routeData.context;
         // console.log('Summary');
         // console.log(this.route);
         // console.log(this.subRoute);
