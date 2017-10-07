@@ -200,6 +200,9 @@
       }
 
       _routeDataChanged(viewWindow) {
+        console.log('Menu');
+        console.log(this.route);
+        console.log(this.subRoute);
         viewWindow = this._resolvePage(viewWindow);
         var resolveUrlMap = {
           page: '../page/sr-page-app.html',

@@ -16,6 +16,7 @@
 
 <link rel="import" href="../page/sr-summary-view.html">
 <link rel="import" href="../page/sr-related-pages-view.html">
+<link rel="import" href="../page/sr-page-relation-view.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../tools/sr-icons.html">
@@ -34,12 +35,18 @@
       }
     </style>
     <app-route
-        route="[[route]]"
+        route="{{route}}"
         pattern="/:pageId"
-        data="{{routeData}}"></app-route>
-
-    <sr-summary-view page="{{page}}"></sr-summary-view>
-    <sr-related-pages-view page="{{page}}"></sr-related-pages-view>
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="{{showSummary()}}">
+      <sr-summary-view page="{{page}}"></sr-summary-view>
+      <sr-related-pages-view page="{{page}}"></sr-related-pages-view>
+    </template>
+    <template is="dom-if" if="{{!showSummary()}}">
+      <sr-page-relation-view
+        properties="{{contextProperties}}"></sr-page-relation-view>
+    </template>
     <iron-ajax
         auto
         url="http://localhost:4000/user/page"
@@ -74,6 +81,11 @@
         ];
       }
 
+      showSummary() {
+        return true;
+        return subRoute == 'summary';
+      }
+
       handleGetPage(event) {
         this.setPage(event.detail.response);
       }
@@ -84,6 +96,9 @@
       }
 
       _routeDataChanged(pageId) {
+        console.log('Page');
+        console.log(this.route);
+        console.log(this.subRoute);
         if (pageId != this.pageId) {
           this.pageId = pageId;
           this._setGetPageParams(pageId);

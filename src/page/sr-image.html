@@ -7,9 +7,9 @@
     <style include="shared-styles">
       
     </style>
-    <paper-card image="http://d226oxd1fw0z1k.cloudfront.net/wp-content/uploads/2016/02/star-wars-land-marketplace-concept-art-2.jpg">
+    <paper-card image="http://localhost:4000/user/file/image/{{properties.thumbnail.link}}">
       <app-toolbar>
-        <div main-title>Village Market</div>
+        <div main-title>{{properties.name}}</div>
         <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="imageSummary1"></paper-icon-button>
         <paper-menu-button dynamic-align="true">
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
@@ -22,7 +22,7 @@
         </paper-menu-button>
       </app-toolbar>
       <div class="card-content">
-        <iron-collapse id="imageSummary1" class="summary">The market is filled with sounds, and sights, and smells.  A sweet aroma of fresh pears lingers in the air, but it is pressed against a sensory overload of a street filled with exotic food, wares, and people.</iron-collapse>
+        <iron-collapse id="imageSummary1" class="summary">{{properties.caption}}</iron-collapse>
       </div>
       <div class="card-actions">
         <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
@@ -36,7 +36,7 @@
 
       static get properties() {
         return {
-          detail: {
+          properties: {
             notify: true,
             readOnly: false,
           }

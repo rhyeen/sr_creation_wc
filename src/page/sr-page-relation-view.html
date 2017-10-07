@@ -1,0 +1,52 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../page/sr-image.html">
+<link rel="import" href="../page/sr-detail.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sr-page-relation-view">
+  <template>
+    <style include="shared-styles">
+      .related-pages {
+        margin-top: 20px;
+      }
+    </style>
+    <paper-card>
+      <template is="dom-if" if="{{isImageRelation(context)}}">
+        <template is="dom-repeat" items="{{properties.list}}">
+          <sr-image properties="item"></sr-image>
+        </template>
+      </template>
+      <template is="dom-if" if="{{isDetailRelation(context)}}">
+        <template is="dom-repeat" items="{{properties.list}}">
+          <sr-detail properties="item"></sr-detail>
+        </template>
+      </template>
+    </paper-card>
+  </template>
+  <script>
+    class SrPageRelationView extends Polymer.Element {
+      static get is() { return 'sr-page-relation-view'; }
+
+      static get properties() {
+        return {
+          properties: {
+            notify: true,
+            readOnly: false
+          }
+        };
+      }
+
+      isImageRelation(context) {
+        return context == 'image';
+      }
+
+      isDetailRelation(context) {
+        return context == 'detail';
+      }
+    }
+
+    window.customElements.define(SrPageRelationView.is, SrPageRelationView);
+  </script>
+</dom-module>

@@ -54,13 +54,13 @@
       <template is="dom-if" if="{{showDetails(page)}}">
         <div class="details">
             <template is="dom-if" if="{{page.details.list}}">
-              <paper-item>
+              <paper-item on-click="openDetails()">
                 <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
                 <div class="title" id="details-detail">Details</div>
               </paper-item>
             </template>
             <template is="dom-if" if="{{page.images.list}}">
-              <paper-item>
+              <paper-item on-click="openImages()">
                 <div class="title" id="details-image">Images</div>
                 <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>
               </paper-item>
@@ -83,6 +83,14 @@
             readOnly: false,
           }
         };
+      }
+
+      openDetails() {
+
+      }
+
+      openImages() {
+        
       }
 
       showDetails(page) {
