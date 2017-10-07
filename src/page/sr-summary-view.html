@@ -23,6 +23,11 @@
       .details {
         margin-top: 20px;
       }
+
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
     </style>
     <app-route
         route="{{route}}"
@@ -60,16 +65,20 @@
         <template is="dom-if" if="{{showDetails(page)}}">
           <div class="details">
               <template is="dom-if" if="{{page.details.list}}">
-                <paper-item on-click="openDetails()">
-                  <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
-                  <div class="title" id="details-detail">Details</div>
-                </paper-item>
+                <a href="{{route.prefix}}/detail" tabindex="-1">
+                  <paper-item>
+                    <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
+                    <div class="title" id="details-detail">Details</div>
+                  </paper-item>
+                </a>
               </template>
               <template is="dom-if" if="{{page.images.list}}">
-                <paper-item on-click="openImages()">
-                  <div class="title" id="details-image">Images</div>
-                  <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>
-                </paper-item>
+                <a href="{{route.prefix}}/image" tabindex="-1">
+                  <paper-item>
+                    <div class="title" id="details-image">Images</div>
+                    <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>
+                  </paper-item>
+                </a>
               </template>
             </div>
         </template>
@@ -99,18 +108,10 @@
         // console.log('Summary');
         // console.log(this.route);
         // console.log(this.subRoute);
-        if (!context) {
-          return this.set('routeData.context', 'summary');
-        }
-        this.set('showView', context == 'summary');
-      }
-
-      openDetails() {
-        this.set('routeData.context', 'detail');
-      }
-
-      openImages() {
-        this.set('routeData.context', 'image');
+        // if (!context) {
+        //   return this.set('routeData.context', 'summary');
+        // }
+        this.set('showView', !context || context == 'summary');
       }
 
       showDetails(page) {

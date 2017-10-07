@@ -42,6 +42,7 @@
       toggleExpand() {
         var iconButton = Polymer.dom(event).localTarget;
         var summaryId = iconButton.getAttribute('target-summary');
+        debugger;
         if (this.$[summaryId].opened) {
           iconButton.icon = 'sr-icons:expand-more';
         } else {

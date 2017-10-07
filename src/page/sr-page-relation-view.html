@@ -12,18 +12,16 @@
         margin-top: 20px;
       }
     </style>
-    <paper-card>
-      <template is="dom-if" if="{{isImageRelation(context)}}">
-        <template is="dom-repeat" items="{{properties.list}}">
-          <sr-image properties="item"></sr-image>
-        </template>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"></app-route>
+    <template is="dom-if" if="contextGroup">
+      <template is="dom-repeat" items="{{contextGroup.list}}">
+        <sr-image context-item="[[item]]" context-index="[[index]]" route="[[route]]"></sr-image>
+        <sr-detail context-item="[[item]]" context-index="[[index]]" route="[[route]]"></sr-detail>
       </template>
-      <template is="dom-if" if="{{isDetailRelation(context)}}">
-        <template is="dom-repeat" items="{{properties.list}}">
-          <sr-detail properties="item"></sr-detail>
-        </template>
-      </template>
-    </paper-card>
+    </template>
   </template>
   <script>
     class SrPageRelationView extends Polymer.Element {
@@ -31,19 +29,45 @@
 
       static get properties() {
         return {
-          properties: {
-            notify: true,
-            readOnly: false
-          }
+          contextGroup: {
+            type: Object
+          },
+          context: String
         };
       }
 
-      isImageRelation(context) {
-        return context == 'image';
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.context)',
+        ];
       }
 
-      isDetailRelation(context) {
-        return context == 'detail';
+      _routeDataChanged(context) {
+        this.set('context', context);
+        this._updateContextedItem(context);
+        // this.set('showView', !context || context == 'summary');
+      }
+
+      _updateContextedItem(context) {
+        if (context == 'detail') {
+          return this._updateItemToDetails();
+        }
+        if (context == 'image') {
+          return this._updateItemToImages();
+        }
+        return this._usetItem();
+      }
+
+      _updateItemToDetails() {
+        this.set('contextGroup', this.page.details);
+      }
+
+      _updateItemToImages() {
+        this.set('contextGroup', this.page.images);
+      }
+
+      _usetItem() {
+        this.set('contextGroup', null);
       }
     }
 

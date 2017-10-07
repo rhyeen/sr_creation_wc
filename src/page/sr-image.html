@@ -7,28 +7,35 @@
     <style include="shared-styles">
       
     </style>
-    <paper-card image="http://localhost:4000/user/file/image/{{properties.thumbnail.link}}">
-      <app-toolbar>
-        <div main-title>{{properties.name}}</div>
-        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="imageSummary1"></paper-icon-button>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-              Edit Image
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="card-content">
-        <iron-collapse id="imageSummary1" class="summary">{{properties.caption}}</iron-collapse>
-      </div>
-      <div class="card-actions">
-        <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
-        <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
-      </div>
-    </paper-card>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="{{showView}}">
+      <paper-card image="http://localhost:4000/user/file/image/thumbnail/{{contextItem.thumbnail.link}}">
+        <app-toolbar>
+          <div main-title>{{contextItem.name}}</div>
+          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Image
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.caption}}</iron-collapse>
+        </div>
+        <div class="card-actions">
+          <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
+          <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
+        </div>
+      </paper-card>
+    </template>
   </template>
   <script>
     class SrImage extends Polymer.Element {
@@ -36,22 +43,37 @@
 
       static get properties() {
         return {
-          properties: {
-            notify: true,
-            readOnly: false,
-          }
+          showView: Boolean
         };
       }
 
       toggleExpand() {
         var iconButton = Polymer.dom(event).localTarget;
-        var summaryId = iconButton.getAttribute('target-summary');
-        if (this.$[summaryId].opened) {
+        var summary = this.shadowRoot.querySelector("#" + this.getTargetSummary());
+        if (summary.opened) {
           iconButton.icon = 'sr-icons:expand-more';
         } else {
           iconButton.icon = 'sr-icons:expand-less';
         }
-        this.$[summaryId].toggle();
+        summary.toggle();
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.context)',
+        ];
+      }
+
+      _routeDataChanged(context) {
+        console.log('Image');
+        console.log(this.route);
+        console.log(this.subRoute);
+        console.log(this.contextItem);
+        this.set('showView', !context || context == 'image');
+      }
+
+      getTargetSummary() {
+        return 'imageSummary' + this.contextIndex;
       }
     }
 

@@ -47,7 +47,7 @@
         page="[[page]]"></sr-related-pages-view>
     <sr-page-relation-view
         route="[[subRoute]]"
-        properties="[[contextProperties]]"></sr-page-relation-view>
+        page="[[page]]"></sr-page-relation-view>
     <iron-ajax
         auto
         url="http://localhost:4000/user/page"
@@ -64,6 +64,7 @@
       static get properties() {
         return {
           page: {
+            type: Object,
             notify: true,
             readOnly: false,
           },
@@ -71,7 +72,7 @@
           getPageParams: {
             type: Object,
             value: {}
-          }
+          },
         };
       }
 
