@@ -100,8 +100,17 @@
 
       static get observers() {
         return [
+          '_routeChanged(route.path)',
           '_routeDataChanged(routeData.context)',
         ];
+      }
+
+      _routeChanged(path) {
+        // if back button is pressed, and routeData.context is going to be null, it won't be: instead it'll stay the same.
+        if (!path) {
+          this.set('routeData', {});
+          this._routeDataChanged(null);
+        }
       }
 
       _routeDataChanged(context) {

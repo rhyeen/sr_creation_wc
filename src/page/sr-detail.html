@@ -7,24 +7,31 @@
     <style include="shared-styles">
       
     </style>
-    <paper-card>
-      <app-toolbar>
-        <div main-title>Traveling through the market</div>
-        <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand" target-summary="detailSummary1"></paper-icon-button>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-              Edit Detail
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="card-content">
-        <iron-collapse id="detailSummary1" class="summary">You've been invited to participate in Lord Tayspire's festival at Fellpines!  Rumor has spread that the wealthy Lord is sinking a small fortune into the party and any and all are invited to attend.  Although you are keen to start your adventuring, you decide to take this opportunity to rest and enjoy the festivities.  You may even be able to find some exotic equipment or seek out a traveling noble or merchant in need of some mercenary work.Upon entering the town of Fellpines, a small and presumably typically quite town now filled with hustle, laughter, and foreign travelers.  Merchants with caravans and small unfolded shops are bunched together against the street's edge, and a crowd of people all crammed together wander with the flow of troubled water from one stall to the next.</iron-collapse>
-      </div>
-    </paper-card>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="{{showView}}">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>{{contextItem.name}}</div>
+          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Detail
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.content.mark_down}}</iron-collapse>
+        </div>
+      </paper-card>
+    </template>
   </template>
   <script>
     class SrDetail extends Polymer.Element {
@@ -32,23 +39,46 @@
 
       static get properties() {
         return {
-          properties: {
-            notify: true,
-            readOnly: false,
-          }
+          showView: Boolean
         };
       }
 
       toggleExpand() {
         var iconButton = Polymer.dom(event).localTarget;
-        var summaryId = iconButton.getAttribute('target-summary');
-        debugger;
-        if (this.$[summaryId].opened) {
+        var summary = this.shadowRoot.querySelector("#" + this.getTargetSummary());
+        if (summary.opened) {
           iconButton.icon = 'sr-icons:expand-more';
         } else {
           iconButton.icon = 'sr-icons:expand-less';
         }
-        this.$[summaryId].toggle();
+        summary.toggle();
+      }
+
+      static get observers() {
+        return [
+          '_routeChanged(route.path)',
+          '_routeDataChanged(routeData.context)',
+        ];
+      }
+
+      _routeChanged(path) {
+        // if back button is pressed, and routeData.context is going to be null, it won't be: instead it'll stay the same.
+        if (!path) {
+          this.set('routeData', {});
+          this._routeDataChanged(null);
+        }
+      }
+
+      _routeDataChanged(context) {
+        // console.log('Detail');
+        // console.log(this.route);
+        // console.log(this.subRoute);
+        // console.log(this.contextItem);
+        this.set('showView', !context || context == 'detail');
+      }
+
+      getTargetSummary() {
+        return 'detailSummary' + this.contextIndex;
       }
     }
 

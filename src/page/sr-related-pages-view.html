@@ -9,34 +9,41 @@
         margin-top: 20px;
       }
     </style>
-    <paper-card>
-      <app-toolbar>
-        <div main-title>Related Pages</div>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
-              Add related pages
-            </paper-icon-item>
-            <paper-icon-item name="account">
-              <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
-              Set related pages
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <template is="dom-if" if="{{showRelatedPages(page)}}">
-        <div class="related-pages">
-          <template is="dom-repeat" items="{{page.pages}}">
-            <paper-item>
-              <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
-              <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
-            </paper-item>
-          </template>
-        </div>
-      </template>
-    </paper-card>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="{{showView}}">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>Related Pages</div>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
+                Add related pages
+              </paper-icon-item>
+              <paper-icon-item name="account">
+                <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
+                Set related pages
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <template is="dom-if" if="{{showRelatedPages(page)}}">
+          <div class="related-pages">
+            <template is="dom-repeat" items="{{page.pages}}">
+              <paper-item>
+                <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
+                <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
+              </paper-item>
+            </template>
+          </div>
+        </template>
+      </paper-card>
+    </template>
   </template>
   <script>
     class SrRelatedPagesView extends Polymer.Element {
@@ -44,11 +51,32 @@
 
       static get properties() {
         return {
-          page: {
-            notify: true,
-            readOnly: false,
-          }
+          showView: Boolean
         };
+      }
+
+      static get observers() {
+        return [
+          '_routeChanged(route.path)',
+          '_routeDataChanged(routeData.context)',
+        ];
+      }
+
+      _routeChanged(path) {
+        // if back button is pressed, and routeData.context is going to be null, it won't be: instead it'll stay the same.
+        if (!path) {
+          this._routeDataChanged(null);
+        }
+      }
+
+      _routeDataChanged(context) {
+        // console.log('Related pages');
+        // console.log(this.route);
+        // console.log(this.subRoute);
+        // if (!context) {
+        //   return this.set('routeData.context', 'summary');
+        // }
+        this.set('showView', !context || context == 'summary');
       }
 
       showRelatedPages(page) {
