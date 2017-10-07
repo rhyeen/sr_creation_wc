@@ -104,7 +104,7 @@
           </app-toolbar>
           <!-- <div class="page-title" sticky>Prophecy of the Bloodmoon God</div> -->
           <app-toolbar class="page-title" sticky>
-            <div main-title>Page
+            <div main-title>{{menuTitle}}
             </div>
             <paper-icon-button icon="sr-icons:search" on-tap="toggleSearchDialog"></paper-icon-button>
             <paper-menu-button dynamic-align="true">
@@ -154,13 +154,39 @@
 
       static get properties() {
         return {
+          menuTitle: {
+            type: String,
+            value: 'Page'
+          }
         };
       }
 
       static get observers() {
         return [
+          '_routeChanges(route.path)',
           '_routeDataChanged(routeData.viewWindow)',
         ];
+      }
+
+      _routeChanges(path) {
+        this._updateMenuTitle(path);
+      }
+
+      _updateMenuTitle(path) {
+        var pathParts = path.split('/');
+        if (pathParts.length == 4) {
+          var context = pathParts[3];
+          if (context == 'summary') {
+            return this.set('menuTitle', 'Page Summary');
+          }
+          if (context == 'detail') {
+            return this.set('menuTitle', 'Page Details');
+          }
+          if (context == 'image') {
+            return this.set('menuTitle', 'Page Images');
+          }
+        }
+        return this.set('menuTitle', 'Page');
       }
 
       toggleSearchDialog() {
