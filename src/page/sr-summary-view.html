@@ -24,53 +24,60 @@
         margin-top: 20px;
       }
     </style>
-    <paper-card>
-      <!-- <div class="header">
-        Prophecy of the bloodmoon god
-      </div> -->
-      <app-toolbar>
-        <div main-title>[[page.name]]</div>
-        <paper-menu-button dynamic-align="true">
-          <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-          <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
-              <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-              Edit Summary
-            </paper-icon-item>
-          </paper-listbox>
-        </paper-menu-button>
-      </app-toolbar>
-      <div class="card-content">
-        <div class="summary">[[page.summary.text]]</div>
-        <div class="properties">
-          <template is="dom-repeat" items="{{page.summary.properties}}">
-            <div class="property">
-              <span class="property-title">[[item.key]]:</span>
-              <span class="property-value">[[item.value]]</span>
-            </div>
-          </template>
-        </div>
-      </div>
-      <template is="dom-if" if="{{showDetails(page)}}">
-        <div class="details">
-            <template is="dom-if" if="{{page.details.list}}">
-              <paper-item on-click="openDetails()">
-                <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
-                <div class="title" id="details-detail">Details</div>
-              </paper-item>
-            </template>
-            <template is="dom-if" if="{{page.images.list}}">
-              <paper-item on-click="openImages()">
-                <div class="title" id="details-image">Images</div>
-                <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>
-              </paper-item>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="{{showView}}">
+      <paper-card>
+        <!-- <div class="header">
+          Prophecy of the bloodmoon god
+        </div> -->
+        <app-toolbar>
+          <div main-title>[[page.name]]</div>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Summary
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <div class="summary">[[page.summary.text]]</div>
+          <div class="properties">
+            <template is="dom-repeat" items="{{page.summary.properties}}">
+              <div class="property">
+                <span class="property-title">[[item.key]]:</span>
+                <span class="property-value">[[item.value]]</span>
+              </div>
             </template>
           </div>
-      </template>
-      <!-- <div class="card-actions">
-        
-      </div> -->
-    </paper-card>
+        </div>
+        <template is="dom-if" if="{{showDetails(page)}}">
+          <div class="details">
+              <template is="dom-if" if="{{page.details.list}}">
+                <paper-item on-click="openDetails()">
+                  <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
+                  <div class="title" id="details-detail">Details</div>
+                </paper-item>
+              </template>
+              <template is="dom-if" if="{{page.images.list}}">
+                <paper-item on-click="openImages()">
+                  <div class="title" id="details-image">Images</div>
+                  <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>
+                </paper-item>
+              </template>
+            </div>
+        </template>
+        <!-- <div class="card-actions">
+          
+        </div> -->
+      </paper-card>
+    </template>
   </template>
   <script>
     class SrSummaryView extends Polymer.Element {
@@ -78,19 +85,32 @@
 
       static get properties() {
         return {
-          page: {
-            notify: true,
-            readOnly: false,
-          }
+          showView: Boolean
         };
       }
 
-      openDetails() {
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.context)',
+        ];
+      }
 
+      _routeDataChanged(context) {
+        // console.log('Summary');
+        // console.log(this.route);
+        // console.log(this.subRoute);
+        if (!context) {
+          return this.set('routeData.context', 'summary');
+        }
+        this.set('showView', context == 'summary');
+      }
+
+      openDetails() {
+        this.set('routeData.context', 'detail');
       }
 
       openImages() {
-        
+        this.set('routeData.context', 'image');
       }
 
       showDetails(page) {

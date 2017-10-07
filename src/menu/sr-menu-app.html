@@ -70,7 +70,7 @@
           <div main-title>Main Menu</div>
           <paper-icon-button icon="sr-icons:close" drawer-toggle></paper-icon-button>
         </app-toolbar>
-        <iron-selector selected="{{viewWindow}}" attr-for-selected="name" class="drawer-list" role="navigation">
+        <iron-selector selected="{{routeData.viewWindow}}" attr-for-selected="name" class="drawer-list" role="navigation">
           <paper-icon-item name="page">
             <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
             Pages
@@ -124,7 +124,7 @@
         </app-header>
 
         <iron-pages
-            selected="[[viewWindow]]"
+            selected="[[routeData.viewWindow]]"
             attr-for-selected="name"
             fallback-selection="page"
             role="main">
@@ -154,13 +154,6 @@
 
       static get properties() {
         return {
-          viewWindow: {
-            type: String,
-            reflectToAttribute: true,
-            observer: '_windowChanged',
-          },
-          routeData: Object,
-          subRoute: String
         };
       }
 
@@ -168,17 +161,6 @@
         return [
           '_routeDataChanged(routeData.viewWindow)',
         ];
-      }
-
-      _windowChanged(viewWindow) {
-        // Close a non-persistent drawer when the page & route are changed.
-        if (!this.$.drawer.persistent) {
-          this.$.drawer.close();
-        }
-        if (this.routeData.viewWindow != viewWindow) {
-          this.set('routeData.viewWindow', viewWindow);
-          // this._routeDataChanged(viewWindow);
-        }
       }
 
       toggleSearchDialog() {
@@ -193,16 +175,21 @@
           'settings'
         ];
         if (validPages.indexOf(viewWindow) === -1) {
-          this.set('route.path', '/page');
+          this.set('routeData.viewWindow', 'page');
+          // this.set('route.path', '/page');
           return 'page';
         }
         return viewWindow;
       }
 
       _routeDataChanged(viewWindow) {
-        console.log('Menu');
-        console.log(this.route);
-        console.log(this.subRoute);
+        // console.log('Menu');
+        // console.log(this.route);
+        // console.log(this.subRoute);
+        // Close a non-persistent drawer when the page & route are changed.
+        if (!this.$.drawer.persistent) {
+          this.$.drawer.close();
+        }
         viewWindow = this._resolvePage(viewWindow);
         var resolveUrlMap = {
           page: '../page/sr-page-app.html',
@@ -215,16 +202,8 @@
         Polymer.importHref(
             resolvedPageUrl,
             null,
-            this._showMainWindow.bind(this),
+            null,
             true);
-      }
-
-      /**
-       * @DEBUG: is not currently called, 
-       * so instead we are guaranting viewWindow is always what we expect it to be.
-       */
-      _showMainWindow() {
-        this.viewWindow = 'page';
       }
     }
 

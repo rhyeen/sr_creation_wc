@@ -14,9 +14,9 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 
 
-<link rel="import" href="../page/sr-summary-view.html">
-<link rel="import" href="../page/sr-related-pages-view.html">
-<link rel="import" href="../page/sr-page-relation-view.html">
+<link rel="lazy-import" href="sr-summary-view.html">
+<link rel="lazy-import" href="sr-related-pages-view.html">
+<link rel="lazy-import" href="sr-page-relation-view.html">
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../tools/sr-icons.html">
@@ -39,18 +39,19 @@
         pattern="/:pageId"
         data="{{routeData}}"
         tail="{{subRoute}}"></app-route>
-    <template is="dom-if" if="{{showSummary()}}">
-      <sr-summary-view page="{{page}}"></sr-summary-view>
-      <sr-related-pages-view page="{{page}}"></sr-related-pages-view>
-    </template>
-    <template is="dom-if" if="{{!showSummary()}}">
-      <sr-page-relation-view
-        properties="{{contextProperties}}"></sr-page-relation-view>
-    </template>
+    <sr-summary-view
+        route="[[subRoute]]"
+        page="[[page]]"></sr-summary-view>
+    <sr-related-pages-view
+        route="[[subRoute]]"
+        page="[[page]]"></sr-related-pages-view>
+    <sr-page-relation-view
+        route="[[subRoute]]"
+        properties="[[contextProperties]]"></sr-page-relation-view>
     <iron-ajax
         auto
         url="http://localhost:4000/user/page"
-        params="{{getPageParams}}"
+        params="[[getPageParams]]"
         handle-as="json"
         on-response="handleGetPage"
         debounce-duration="300"></iron-ajax>
@@ -66,7 +67,6 @@
             notify: true,
             readOnly: false,
           },
-          routeData: Object,
           pageId: String,
           getPageParams: {
             type: Object,
@@ -81,13 +81,23 @@
         ];
       }
 
-      showSummary() {
-        return true;
-        return subRoute == 'summary';
-      }
-
       handleGetPage(event) {
         this.setPage(event.detail.response);
+        Polymer.importHref(
+            'src/page/sr-summary-view.html',
+            null,
+            null,
+            true);
+        Polymer.importHref(
+            'src/page/sr-related-pages-view.html',
+            null,
+            null,
+            true);
+        Polymer.importHref(
+            'src/page/sr-page-relation-view.html',
+            null,
+            null,
+            true);
       }
 
       setPage(page) {
@@ -96,9 +106,9 @@
       }
 
       _routeDataChanged(pageId) {
-        console.log('Page');
-        console.log(this.route);
-        console.log(this.subRoute);
+        // console.log('Page');
+        // console.log(this.route);
+        // console.log(this.subRoute);
         if (pageId != this.pageId) {
           this.pageId = pageId;
           this._setGetPageParams(pageId);
