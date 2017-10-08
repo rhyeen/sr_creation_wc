@@ -104,20 +104,25 @@
           </app-toolbar>
           <!-- <div class="page-title" sticky>Prophecy of the Bloodmoon God</div> -->
           <app-toolbar class="page-title" sticky>
+            <template is="dom-if" if="{{showBackButton}}">
+              <paper-icon-button icon="sr-icons:arrow-back" on-tap="goBack"></paper-icon-button>
+            </template>
             <div main-title>{{menuTitle}}
             </div>
             <paper-icon-button icon="sr-icons:search" on-tap="toggleSearchDialog"></paper-icon-button>
             <paper-menu-button dynamic-align="true">
               <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
               <paper-listbox slot="dropdown-content">
-                <paper-icon-item name="newPage">
-                  <iron-icon icon="sr-icons:page-add" slot="item-icon"></iron-icon>
-                  New page
-                </paper-icon-item>
-                <paper-icon-item name="deletePage">
+                <template is="dom-repeat" items="{{menuItems}}">
+                  <paper-icon-item>
+                    <iron-icon icon="sr-icons:{{item.icon}}" slot="item-icon"></iron-icon>
+                    {{item.title}}
+                  </paper-icon-item>
+                </template>
+                <!-- <paper-icon-item name="deletePage">
                   <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
                   Delete page
-                </paper-icon-item>
+                </paper-icon-item> -->
               </paper-listbox>
             </paper-menu-button>
           </app-toolbar>
@@ -157,6 +162,14 @@
           menuTitle: {
             type: String,
             value: 'Page'
+          },
+          menuItems: {
+            type: Array,
+            value: []
+          },
+          backPath: {
+            type: String,
+            value: false
           }
         };
       }
@@ -177,13 +190,46 @@
         if (pathParts.length == 4) {
           var context = pathParts[3];
           if (context == 'summary') {
+            this.set('showBackButton', false);
+            this.set('menuItems', [
+              {
+                title: 'New Page',
+                icon: 'page-add'
+              },
+              {
+                title: 'Delete Page',
+                icon: 'delete'
+              }
+            ]);
             return this.set('menuTitle', 'Page Summary');
           }
           if (context == 'detail') {
-            return this.set('menuTitle', 'Page Details');
+            this.set('showBackButton', true);
+            this.set('menuItems', [
+              {
+                title: 'New Detail',
+                icon: 'add-circle'
+              },
+              {
+                title: 'Reorder Details',
+                icon: 'reorder'
+              }
+            ]);
+            return this.set('menuTitle', 'Details');
           }
           if (context == 'image') {
-            return this.set('menuTitle', 'Page Images');
+            this.set('showBackButton', true);
+            this.set('menuItems', [
+              {
+                title: 'New Image',
+                icon: 'add-circle'
+              },
+              {
+                title: 'Reorder Images',
+                icon: 'reorder'
+              }
+            ]);
+            return this.set('menuTitle', 'Images');
           }
         }
         return this.set('menuTitle', 'Page');
@@ -191,6 +237,10 @@
 
       toggleSearchDialog() {
         this.$.searchDialog.toggle();
+      }
+
+      goBack() {
+        window.history.back();
       }
 
       _resolvePage(viewWindow) {

@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../tools/rendered_markdown.html">
 
 <link rel="import" href="../shared-styles.html">
 
@@ -24,11 +25,18 @@
                 <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
                 Edit Detail
               </paper-icon-item>
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                Delete Detail
+              </paper-icon-item>
             </paper-listbox>
           </paper-menu-button>
         </app-toolbar>
         <div class="card-content">
-          <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.content.mark_down}}</iron-collapse>
+          <iron-collapse id="[[getTargetSummary()]]" class="summary">
+            <rendered-markdown
+                partitions="{{contextItem.content.partitions}}"></rendered-markdown>
+          </iron-collapse>
         </div>
       </paper-card>
     </template>

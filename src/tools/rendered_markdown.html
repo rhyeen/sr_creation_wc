@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="rendered-markdown">
+  <template>
+    <style include="shared-styles">
+      a {
+        color: inherit;
+        text-decoration: inherit;
+        background-color: #ededed;
+        border-radius: 4px;
+        margin: 0;
+        padding: 2px 4px;
+      }
+    </style>
+    <template is="dom-repeat" items={{partitions}}>
+      <template is="dom-if" if="{{isText(item)}}">
+        <span>{{item.text}}</span>
+      </template>
+      <template is="dom-if" if="{{isTag(item)}}">
+        <a href="{{getTagUrl(item)}}" target="_blank">{{item.text}}</a>
+      </template>
+    </template>
+  </template>
+  <script>
+    class RenderedMarkdown extends Polymer.Element {
+      static get is() { return 'rendered-markdown'; }
+
+      static get properties() {
+        return {
+        };
+      }
+
+      isText(item) {
+        return item.type == "text";
+      }
+
+      isTag(item) {
+        return item.type == "tag";
+      }
+
+      getTagUrl(item) {
+        return window.location.origin + "/page/" + item.tag.id;
+      }
+    }
+
+    window.customElements.define(RenderedMarkdown.is, RenderedMarkdown);
+  </script>
+</dom-module>
