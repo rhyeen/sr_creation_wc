@@ -21,6 +21,10 @@
         <sr-image context-item="[[item]]" context-index="[[index]]" route="[[route]]"></sr-image>
         <sr-detail context-item="[[item]]" context-index="[[index]]" route="[[route]]"></sr-detail>
       </template>
+      <template is="dom-if" if="{{!hasContextList(contextGroup)}}">
+        <sr-image route="[[route]]"></sr-image>
+        <sr-detail route="[[route]]"></sr-detail>
+      </template>
     </template>
   </template>
   <script>
@@ -39,6 +43,10 @@
         return [
           '_routeDataChanged(routeData)',
         ];
+      }
+
+      hasContextList(contextGroup) {
+        return contextGroup.list && contextGroup.list.length;
       }
 
       _routeDataChanged(routeData) {

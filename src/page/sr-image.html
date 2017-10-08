@@ -74,7 +74,7 @@
         // console.log(this.route);
         // console.log(this.subRoute);
         // console.log(this.contextItem);
-        this.set('showView', !context || context == 'image');
+        this.set('showView', context == 'image' && this.contextItem);
       }
 
       getTargetSummary() {
