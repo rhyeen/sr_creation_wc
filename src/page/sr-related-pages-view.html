@@ -8,6 +8,11 @@
       .related-pages {
         margin-top: 20px;
       }
+
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
     </style>
     <app-route
         route="{{route}}"
@@ -35,10 +40,12 @@
         <template is="dom-if" if="{{showRelatedPages(page)}}">
           <div class="related-pages">
             <template is="dom-repeat" items="{{page.pages}}">
-              <paper-item>
-                <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
-                <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
-              </paper-item>
+              <a href="{{route.prefix}}/related-pages/{{item.type}}" tabindex="-1">
+                <paper-item>
+                  <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
+                  <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
+                </paper-item>
+              </a>
             </template>
           </div>
         </template>
@@ -88,54 +95,111 @@
       }
 
       getRelatedPageName(relatedPage) {
-        switch (relatedPage.type) {
-          case 'AS':
-            return 'associations';
-          case 'CA':
-            return 'campaigns';
-          case 'CH':
-            return 'characters';
-          case 'DI':
-            return 'districts';
-          case 'EA':
-            return 'eras';
-          case 'EV':
-            return 'events';
-          case 'GR':
-            return 'groups';
-          case 'HI':
-            return 'histories';
-          case 'IT':
-            return 'items';
-          case 'LM':
-            return 'landmarks';
-          case 'LR':
-            return 'lores';
-          case 'PL':
-            return 'places';
-          case 'QU':
-            return 'quests';
-          case 'RA':
-            return 'races';
-          case 'RG':
-            return 'regions';
-          case 'RP':
-            return 'reports';
-          case 'SE':
-            return 'sections';
-          case 'ST':
-            return 'sets';
-          case 'SP':
-            return 'species';
-          case 'SA':
-            return 'story arcs';
-          case 'TX':
-            return 'taxons';
-          case 'WD':
-            return 'worlds';
-          default:
-            return null;
+        var relatedPageMap = this._getRelatedPageMap(relatedPage.type);
+        if (!relatedPageMap) {
+          return null;
         }
+        return relatedPageMap.plural;
+      }
+
+      /** also in sr-menu-app.
+          @TODO: add to a single service.
+       */
+      _getRelatedPageMap(pageType) {
+        var map = {
+          'AS': {
+            plural: 'associations',
+            singular: 'association'
+          },
+          'CA': {
+            plural: 'campaigns',
+            singular: 'campaign'
+          },
+          'CH': {
+            plural: 'characters',
+            singular: 'character'
+          },
+          'DI': {
+            plural: 'districts',
+            singular: 'district'
+          },
+          'EA': {
+            plural: 'eras',
+            singular: 'era'
+          },
+          'EV': {
+            plural: 'events',
+            singular: 'event'
+          },
+          'GR': {
+            plural: 'groups',
+            singular: 'group'
+          },
+          'HI': {
+            plural: 'histories',
+            singular: 'history'
+          },
+          'IT': {
+            plural: 'items',
+            singular: 'item'
+          },
+          'LM': {
+            plural: 'landmarks',
+            singular: 'landmark'
+          },
+          'LR': {
+            plural: 'lores',
+            singular: 'lore'
+          },
+          'PL': {
+            plural: 'places',
+            singular: 'place'
+          },
+          'QU': {
+            plural: 'quests',
+            singular: 'quest'
+          },
+          'RA': {
+            plural: 'races',
+            singular: 'race'
+          },
+          'RG': {
+            plural: 'regions',
+            singular: 'region'
+          },
+          'RP': {
+            plural: 'reports',
+            singular: 'report'
+          },
+          'SE': {
+            plural: 'sections',
+            singular: 'section'
+          },
+          'ST': {
+            plural: 'sets',
+            singular: 'set'
+          },
+          'SP': {
+            plural: 'species',
+            singular: 'species'
+          },
+          'SA': {
+            plural: 'story arcs',
+            singular: 'story arc'
+          },
+          'TX': {
+            plural: 'taxons',
+            singular: 'taxon'
+          },
+          'WD': {
+            plural: 'worlds',
+            singular: 'worlds'
+          }
+        }
+        if (!(pageType in map)) {
+          return null;
+        }
+        return map[pageType];
       }
     }
 

@@ -1,0 +1,131 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../tools/rendered_markdown.html">
+
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="sr-related-pages">
+  <template>
+    <style include="shared-styles">
+      .no-context {
+        margin-top: 80px;
+        color: var(--google-grey-700);
+      }
+      .no-context p {
+        text-align: center;
+      }
+
+      .no-context .title {
+        @apply --paper-font-title;
+      }
+      .no-context .tooltip {
+        @apply --paper-font-subhead;
+      }
+
+      paper-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
+    </style>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="[[showView]]">
+      <template is="dom-if" if="[[hasContextItem]]">
+        <paper-card>
+          <app-toolbar>
+            <div main-title>{{contextItem.name}}</div>
+            <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+            <paper-menu-button dynamic-align="true">
+              <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-icon-item name="page">
+                  <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                  Edit Relationship
+                </paper-icon-item>
+                <paper-icon-item name="page">
+                  <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                  Unlink Pages
+                </paper-icon-item>
+              </paper-listbox>
+            </paper-menu-button>
+          </app-toolbar>
+          <div class="card-content">
+            <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.summary.text}}</iron-collapse>
+          </div>
+          <div class="card-actions">
+            <a href="{{getPageLinkUrl(contextItem)}}" tabindex="-1">
+              <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Go to Page</paper-button>
+            </a>
+          </div>
+        </paper-card>
+      </template>
+      <template is="dom-if" if="[[!hasContextItem]]">
+        <div class="no-context">
+          <p class="title">This page has no related pages.</p>
+          <p class="tooltip">Add one using the "+" button below.</p>
+        </div>
+      </template>
+      <paper-fab icon="sr-icons:add" title="Add Related Page"></paper-fab>
+    </template>
+  </template>
+  <script>
+    class SrRelatedPages extends Polymer.Element {
+      static get is() { return 'sr-related-pages'; }
+
+      static get properties() {
+        return {
+          showView: Boolean,
+          hasContextItem: Boolean
+        };
+      }
+
+      getPageLinkUrl(contextItem) {
+        return window.location.origin + "/page/" + contextItem.id + "/summary";
+      }
+
+      toggleExpand() {
+        var iconButton = Polymer.dom(event).localTarget;
+        var summary = this.shadowRoot.querySelector("#" + this.getTargetSummary());
+        if (summary.opened) {
+          iconButton.icon = 'sr-icons:expand-more';
+        } else {
+          iconButton.icon = 'sr-icons:expand-less';
+        }
+        summary.toggle();
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData)',
+        ];
+      }
+
+      _routeDataChanged(routeData) {
+        var context = routeData.context;
+        // console.log('Detail');
+        // console.log(this.route);
+        // console.log(this.subRoute);
+        // console.log(this.contextItem);
+        this.set('hasContextItem', !!this.contextItem);
+        this.set('showView', context == 'related-pages');
+      }
+
+      getTargetSummary() {
+        return 'relatedPagesSummary' + this.contextIndex;
+      }
+    }
+
+    window.customElements.define(SrRelatedPages.is, SrRelatedPages);
+  </script>
+</dom-module>

@@ -2,6 +2,7 @@
 
 <link rel="import" href="../page/sr-image.html">
 <link rel="import" href="../page/sr-detail.html">
+<link rel="import" href="../page/sr-related-pages.html">
 
 <link rel="import" href="../shared-styles.html">
 
@@ -18,12 +19,24 @@
         data="{{routeData}}"></app-route>
     <template is="dom-if" if="contextGroup">
       <template is="dom-repeat" items="{{contextGroup.list}}">
-        <sr-image context-item="[[item]]" context-index="[[index]]" route="[[route]]"></sr-image>
-        <sr-detail context-item="[[item]]" context-index="[[index]]" route="[[route]]"></sr-detail>
+        <sr-image
+            context-item="[[item]]"
+            context-index="[[index]]"
+            route="[[route]]"></sr-image>
+        <sr-detail
+            context-item="[[item]]"
+            context-index="[[index]]"
+            route="[[route]]"></sr-detail>
+        <sr-related-pages
+            context-item="[[item]]"
+            context-index="[[index]]"
+            route="[[route]]"></sr-related-pages>
       </template>
       <template is="dom-if" if="{{!hasContextList(contextGroup)}}">
         <sr-image route="[[route]]"></sr-image>
         <sr-detail route="[[route]]"></sr-detail>
+        <!-- normally impossible to reach, but possible if all related pages were deleted from the related-pages-view -->
+        <sr-related-pages route="[[route]]"></sr-related-pages>
       </template>
     </template>
   </template>
@@ -61,6 +74,9 @@
         if (context == 'image') {
           return this._updateItemToImages();
         }
+        if (context == 'related-pages') {
+          return this._updateItemToRelatedPage();
+        }
         return this._usetItem();
       }
 
@@ -70,6 +86,25 @@
 
       _updateItemToImages() {
         this.set('contextGroup', this.page.images);
+      }
+
+      _updateItemToRelatedPage() {
+        var pathParts = this.route.path.split('/');
+        var relatedPageType = pathParts[pathParts.length - 1];
+        this.set('contextGroup', this._getRelatedPages(relatedPageType));
+      }
+
+      _getRelatedPages(relatedPageType) {
+        var i;
+        if (!this.page.pages) {
+          return null;
+        }
+        for (i = 0; i < this.page.pages.length; i++) {
+          if (this.page.pages[i].type == relatedPageType) {
+            return this.page.pages[i].properties;
+          }
+        }
+        return null;
       }
 
       _usetItem() {

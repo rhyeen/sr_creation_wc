@@ -232,7 +232,152 @@
             return this.set('menuTitle', 'Images');
           }
         }
+        if (pathParts.length == 5) {
+          if (pathParts[3] == 'related-pages') {
+            var relatedPageType = pathParts[4];
+            this.set('showBackButton', true);
+            this.set('menuItems', [
+              {
+                title: this._getRelatedPageAddPageTitle(relatedPageType),
+                icon: 'add-circle'
+              },
+              {
+                title: this._getRelatedPageReorderPageTitle(relatedPageType),
+                icon: 'reorder'
+              }
+            ]);
+            return this.set('menuTitle', this._getRelatedPageMenuTitle(relatedPageType));
+          }
+        }
         return this.set('menuTitle', 'Page');
+      }
+
+      _getRelatedPageAddPageTitle(relatedPageType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPageType);
+        if (!relatedPageMap) {
+          return "Add Related Page";
+        }
+        return "Add " + this._capitalizeFirstLetter(relatedPageMap.singular);
+      }
+
+      _getRelatedPageReorderPageTitle(relatedPageType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPageType);
+        if (!relatedPageMap) {
+          return "Reorder Related Pages";
+        }
+        return "Reorder " + this._capitalizeFirstLetter(relatedPageMap.plural);
+      }
+
+      _getRelatedPageMenuTitle(relatedPageType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPageType);
+        if (!relatedPageMap) {
+          return "Related Pages";
+        }
+        return "Related " + this._capitalizeFirstLetter(relatedPageMap.plural);
+      }
+
+      _capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      /** also in sr-related-pages-view.
+          @TODO: add to a single service.
+       */
+      _getRelatedPageMap(pageType) {
+        var map = {
+          'AS': {
+            plural: 'associations',
+            singular: 'association'
+          },
+          'CA': {
+            plural: 'campaigns',
+            singular: 'campaign'
+          },
+          'CH': {
+            plural: 'characters',
+            singular: 'character'
+          },
+          'DI': {
+            plural: 'districts',
+            singular: 'district'
+          },
+          'EA': {
+            plural: 'eras',
+            singular: 'era'
+          },
+          'EV': {
+            plural: 'events',
+            singular: 'event'
+          },
+          'GR': {
+            plural: 'groups',
+            singular: 'group'
+          },
+          'HI': {
+            plural: 'histories',
+            singular: 'history'
+          },
+          'IT': {
+            plural: 'items',
+            singular: 'item'
+          },
+          'LM': {
+            plural: 'landmarks',
+            singular: 'landmark'
+          },
+          'LR': {
+            plural: 'lores',
+            singular: 'lore'
+          },
+          'PL': {
+            plural: 'places',
+            singular: 'place'
+          },
+          'QU': {
+            plural: 'quests',
+            singular: 'quest'
+          },
+          'RA': {
+            plural: 'races',
+            singular: 'race'
+          },
+          'RG': {
+            plural: 'regions',
+            singular: 'region'
+          },
+          'RP': {
+            plural: 'reports',
+            singular: 'report'
+          },
+          'SE': {
+            plural: 'sections',
+            singular: 'section'
+          },
+          'ST': {
+            plural: 'sets',
+            singular: 'set'
+          },
+          'SP': {
+            plural: 'species',
+            singular: 'species'
+          },
+          'SA': {
+            plural: 'story arcs',
+            singular: 'story arc'
+          },
+          'TX': {
+            plural: 'taxons',
+            singular: 'taxon'
+          },
+          'WD': {
+            plural: 'worlds',
+            singular: 'worlds'
+          }
+        }
+        if (!(pageType in map)) {
+          return null;
+        }
+        return map[pageType];
       }
 
       toggleSearchDialog() {
