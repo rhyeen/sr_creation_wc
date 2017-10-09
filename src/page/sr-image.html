@@ -1,11 +1,32 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../shared-styles.html">
 
 <dom-module id="sr-image">
   <template>
     <style include="shared-styles">
-      
+      .no-context {
+        margin-top: 80px;
+        color: var(--google-grey-700);
+      }
+      .no-context p {
+        text-align: center;
+      }
+
+      .no-context .title {
+        @apply --paper-font-title;
+      }
+      .no-context .tooltip {
+        @apply --paper-font-subhead;
+      }
+
+      paper-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+      }
     </style>
     <app-route
         route="{{route}}"
@@ -13,32 +34,41 @@
         data="{{routeData}}"
         tail="{{subRoute}}"></app-route>
     <template is="dom-if" if="{{showView}}">
-      <paper-card image="http://localhost:4000/user/file/image/thumbnail/{{contextItem.thumbnail.link}}">
-        <app-toolbar>
-          <div main-title>{{contextItem.name}}</div>
-          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
-          <paper-menu-button dynamic-align="true">
-            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-            <paper-listbox slot="dropdown-content">
-              <paper-icon-item name="page">
-                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
-                Edit Image
-              </paper-icon-item>
-              <paper-icon-item name="page">
-                <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
-                Delete Image
-              </paper-icon-item>
-            </paper-listbox>
-          </paper-menu-button>
-        </app-toolbar>
-        <div class="card-content">
-          <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.caption}}</iron-collapse>
+      <template is="dom-if" if="[[hasContextItem]]">
+        <paper-card image="http://localhost:4000/user/file/image/thumbnail/{{contextItem.thumbnail.link}}">
+          <app-toolbar>
+            <div main-title>{{contextItem.name}}</div>
+            <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+            <paper-menu-button dynamic-align="true">
+              <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-icon-item name="page">
+                  <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                  Edit Image
+                </paper-icon-item>
+                <paper-icon-item name="page">
+                  <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                  Delete Image
+                </paper-icon-item>
+              </paper-listbox>
+            </paper-menu-button>
+          </app-toolbar>
+          <div class="card-content">
+            <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.caption}}</iron-collapse>
+          </div>
+          <div class="card-actions">
+            <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
+            <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
+          </div>
+        </paper-card>
+      </template>
+      <template is="dom-if" if="[[!hasContextItem]]">
+        <div class="no-context">
+          <p class="title">This page has no images.</p>
+          <p class="tooltip">Add one using the "+" button below.</p>
         </div>
-        <div class="card-actions">
-          <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
-          <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
-        </div>
-      </paper-card>
+      </template>
+      <paper-fab icon="sr-icons:add" title="Add Image"></paper-fab>
     </template>
   </template>
   <script>
@@ -47,7 +77,8 @@
 
       static get properties() {
         return {
-          showView: Boolean
+          showView: Boolean,
+          hasContextItem: Boolean
         };
       }
 
@@ -74,7 +105,8 @@
         // console.log(this.route);
         // console.log(this.subRoute);
         // console.log(this.contextItem);
-        this.set('showView', context == 'image' && this.contextItem);
+        this.set('hasContextItem', !!this.contextItem);
+        this.set('showView', context == 'image');
       }
 
       getTargetSummary() {

@@ -46,7 +46,7 @@
       }
 
       hasContextList(contextGroup) {
-        return contextGroup.list && contextGroup.list.length;
+        return contextGroup && contextGroup.list && contextGroup.list.length;
       }
 
       _routeDataChanged(routeData) {
