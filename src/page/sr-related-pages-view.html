@@ -23,29 +23,61 @@
       <paper-card>
         <app-toolbar>
           <div main-title>Related Pages</div>
-          <paper-menu-button dynamic-align="true">
-            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-            <paper-listbox slot="dropdown-content">
-              <paper-icon-item name="page">
-                <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
-                Add a Related Page
-              </paper-icon-item>
-              <paper-icon-item name="account">
-                <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
-                Reorder Related Pages
-              </paper-icon-item>
-            </paper-listbox>
-          </paper-menu-button>
+          <template is="dom-if" if="{{!reorderingPages}}">
+            <paper-menu-button dynamic-align="true">
+              <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+              <paper-listbox slot="dropdown-content">
+                <paper-icon-item name="page">
+                  <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
+                  Add a Related Page
+                </paper-icon-item>
+                <paper-icon-item name="account" on-tap="reorderPages">
+                  <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
+                  Reorder Related Pages
+                </paper-icon-item>
+              </paper-listbox>
+            </paper-menu-button>
+          </template>
+          <template is="dom-if" if="{{reorderingPages}}">
+            <paper-icon-button icon="sr-icons:done" on-tap="confirmReorderPages"></paper-icon-button>
+          </template>
         </app-toolbar>
         <template is="dom-if" if="{{showRelatedPages(page)}}">
           <div class="related-pages">
             <template is="dom-repeat" items="{{page.pages}}">
-              <a href="{{route.prefix}}/related-pages/{{item.type}}" tabindex="-1">
+              <template is="dom-if" if="{{!reorderingPages}}">
+                <a href="{{route.prefix}}/related-pages/{{item.type}}" tabindex="-1">
+                  <paper-item>
+                    <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
+                    <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
+                  </paper-item>
+                </a>
+              </template>
+              <template is="dom-if" if="{{reorderingPages}}">
                 <paper-item>
-                  <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
-                  <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
+                  <div class="title">[[getRelatedPageName(item)]]</div>
+                  <paper-icon-button
+                      icon="sr-icons:vertical-align-top"
+                      on-tap="moveRelatedPageToTop"
+                      value="[[index]]"
+                      disabled="[[isFirstElement(index)]]"></paper-icon-button>
+                  <paper-icon-button
+                      icon="sr-icons:arrow-upward"
+                      on-tap="moveRelatedPageUp"
+                      value="[[index]]"
+                      disabled="[[isFirstElement(index)]]"></paper-icon-button>
+                  <paper-icon-button
+                      icon="sr-icons:arrow-downward"
+                      on-tap="moveRelatedPageDown"
+                      value="[[index]]"
+                      disabled="[[isLastElement(index, page.pages)]]"></paper-icon-button>
+                  <paper-icon-button
+                      icon="sr-icons:vertical-align-bottom"
+                      on-tap="moveRelatedPageToBottom"
+                      value="[[index]]"
+                      disabled="[[isLastElement(index, page.pages)]]"></paper-icon-button>
                 </paper-item>
-              </a>
+              </template>
             </template>
           </div>
         </template>
@@ -58,7 +90,11 @@
 
       static get properties() {
         return {
-          showView: Boolean
+          showView: Boolean,
+          reorderingPages: {
+            type: Boolean,
+            value: false
+          }
         };
       }
 
@@ -84,6 +120,38 @@
         //   return this.set('routeData.context', 'summary');
         // }
         this.set('showView', !context || context == 'summary');
+      }
+
+      isLastElement(index, list) {
+        return index >= list.length - 1;
+      }
+
+      isFirstElement(index) {
+        return index <= 0;
+      }
+
+      reorderPages() {
+        this.set('reorderingPages', true);
+      }
+
+      confirmReorderPages() {
+        this.set('reorderingPages', false);
+      }
+
+      moveRelatedPageUp(event) {
+        console.log('Moving up...' + event.currentTarget.value);
+      }
+
+      moveRelatedPageDown(event) {
+        console.log('Moving down...' + event.currentTarget.value);
+      }
+
+      moveRelatedPageToTop(event) {
+        console.log('Moving to top...' + event.currentTarget.value);
+      }
+
+      moveRelatedPageToBottom(event) {
+        console.log('Moving to bottom...' + event.currentTarget.value);
       }
 
       showRelatedPages(page) {
