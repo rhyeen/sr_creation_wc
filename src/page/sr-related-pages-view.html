@@ -57,7 +57,7 @@
                 <paper-item>
                   <div class="title">[[getRelatedPageName(item)]]</div>
                   <paper-icon-button
-                      icon="sr-icons:vertical-align-top"
+                      icon="sr-icons:send-to-top"
                       on-tap="moveRelatedPageToTop"
                       value="[[index]]"
                       disabled="[[isFirstElement(index)]]"></paper-icon-button>
@@ -72,7 +72,7 @@
                       value="[[index]]"
                       disabled="[[isLastElement(index, page.pages)]]"></paper-icon-button>
                   <paper-icon-button
-                      icon="sr-icons:vertical-align-bottom"
+                      icon="sr-icons:send-to-bottom"
                       on-tap="moveRelatedPageToBottom"
                       value="[[index]]"
                       disabled="[[isLastElement(index, page.pages)]]"></paper-icon-button>
@@ -139,19 +139,27 @@
       }
 
       moveRelatedPageUp(event) {
-        console.log('Moving up...' + event.currentTarget.value);
+        var index = event.currentTarget.value;
+        this._moveRelatedPage(index, index - 1);
+      }
+
+      _moveRelatedPage(oldIndex, newIndex) {
+        this.splice('page.pages', newIndex, 0, this.page.pages.splice(oldIndex, 1)[0]);
       }
 
       moveRelatedPageDown(event) {
-        console.log('Moving down...' + event.currentTarget.value);
+        var index = event.currentTarget.value;
+        this._moveRelatedPage(index, index + 1);
       }
 
       moveRelatedPageToTop(event) {
-        console.log('Moving to top...' + event.currentTarget.value);
+        var index = event.currentTarget.value;
+        this._moveRelatedPage(index, 0);
       }
 
       moveRelatedPageToBottom(event) {
-        console.log('Moving to bottom...' + event.currentTarget.value);
+        var index = event.currentTarget.value;
+        this._moveRelatedPage(index, this.page.pages.length - 1);
       }
 
       showRelatedPages(page) {
