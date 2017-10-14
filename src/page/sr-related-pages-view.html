@@ -83,6 +83,14 @@
         </template>
       </paper-card>
     </template>
+    <iron-ajax
+        id="updatePageAjax"
+        url="http://localhost:4000/user/page"
+        handle-as="json"
+        method="PUT"
+        content-type="application/json"
+        on-response="handleUpdatePage"
+        debounce-duration="300"></iron-ajax>
   </template>
   <script>
     class SrRelatedPagesView extends Polymer.Element {
@@ -136,6 +144,7 @@
 
       confirmReorderPages() {
         this.set('reorderingPages', false);
+        this._updatePageLinks();
       }
 
       moveRelatedPageUp(event) {
@@ -160,6 +169,47 @@
       moveRelatedPageToBottom(event) {
         var index = event.currentTarget.value;
         this._moveRelatedPage(index, this.page.pages.length - 1);
+      }
+
+      _updatePageLinks() {
+        var params = {
+          id: this.page.id
+        };
+        var body = {
+          pages: this._transformPageLinkProperties()
+        };
+        this.$.updatePageAjax.body = body;
+        this.$.updatePageAjax.params = params;
+        this.$.updatePageAjax.generateRequest();
+      }
+
+      _transformPageLinkProperties() {
+        var transformedPageLinkProperties = [];
+        var i, page, properties, key;
+        for (i = 0; i < this.page.pages.length; i++) {
+          page = this.page.pages[i];
+          properties = null;
+          if (page['properties']) {
+            for (key in page['properties']) {
+              if (key == 'list') {
+                continue;
+              }
+              if (!properties) {
+                properties = {};
+              }
+              properties[key] = page['properties'][key];
+            }
+          }
+          transformedPageLinkProperties.push({
+            'type': page['type'],
+            properties: properties
+          });
+        }
+        return transformedPageLinkProperties;
+      }
+
+      handleUpdatePage(event) {
+        // @TODO: later I should have a loading spinner until this is assured. Or have everything disabled until load is complete.
       }
 
       showRelatedPages(page) {
