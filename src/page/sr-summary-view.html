@@ -23,11 +23,6 @@
       .details {
         margin-top: 20px;
       }
-
-      a {
-        color: inherit;
-        text-decoration: inherit;
-      }
     </style>
     <app-route
         route="{{route}}"
@@ -65,7 +60,7 @@
         <template is="dom-if" if="{{showDetails(page)}}">
           <div class="details">
               <template is="dom-if" if="{{page.details.list}}">
-                <a href="{{route.prefix}}/detail" tabindex="-1">
+                <a class="route-link" href="{{route.prefix}}/detail" tabindex="-1">
                   <paper-item>
                     <paper-badge for="details-detail" label="{{page.details.list.length}}"></paper-badge>
                     <div class="title" id="details-detail">Details</div>
@@ -73,7 +68,7 @@
                 </a>
               </template>
               <template is="dom-if" if="{{page.images.list}}">
-                <a href="{{route.prefix}}/image" tabindex="-1">
+                <a class="route-link" href="{{route.prefix}}/image" tabindex="-1">
                   <paper-item>
                     <div class="title" id="details-image">Images</div>
                     <paper-badge for="details-image" label="{{page.images.list.length}}"></paper-badge>

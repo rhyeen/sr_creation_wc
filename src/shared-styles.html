@@ -36,6 +36,44 @@
         text-transform: none;
         font-size: 18px;
       }
+
+      paper-listbox paper-icon-item {
+        white-space: nowrap;
+      }
+
+      /* See https://github.com/PolymerElements/paper-item/issues/21 */
+      .route-link {
+        text-decoration: inherit;
+        color: inherit;
+      }
+
+      /* HACK: Makes <a> work with <paper-item> selected item styling.
+       * https://github.com/PolymerElements/iron-elements/issues/37*/
+      .route-link:focus {
+        outline: none;
+      }
+
+      /* HACK: Makes <a> work with <paper-item> selected item styling.
+       * https://github.com/PolymerElements/iron-elements/issues/37*/
+      .route-link.iron-selected paper-item,
+      .route-link.iron-selected paper-icon-item{
+        font-weight: bold;
+      }
+      
+      /* HACK: Makes <a> work with <paper-item> focus styling.
+       * https://github.com/PolymerElements/iron-elements/issues/37 */
+      .route-link:focus paper-item:before,
+      .route-link:focus paper-icon-item:before {
+        @apply(--layout-fit);
+        background: currentColor;
+        content: '';
+        opacity: var(--dark-divider-opacity);
+      }
+
+      .btn-warn {
+        background-color: var(--paper-red-500);
+        color: white;
+      }
     </style>
   </template>
 </dom-module>

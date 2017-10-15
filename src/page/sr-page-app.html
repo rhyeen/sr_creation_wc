@@ -83,6 +83,7 @@
       static get observers() {
         return [
           '_routeDataChanged(routeData.pageId)',
+          '_routePathChanged(route.path)',
         ];
       }
 
@@ -108,6 +109,12 @@
       setPage(page) {
         this.page = page;
         console.log(page);
+      }
+
+      _routePathChanged(path) {
+        if (!path && 'pageId' in this.routeData && this.routeData.pageId) {
+          this.set('routeData.pageId', null);
+        }
       }
 
       _routeDataChanged(pageId) {

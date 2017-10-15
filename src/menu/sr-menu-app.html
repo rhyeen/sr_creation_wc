@@ -12,11 +12,15 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="../../bower_components/paper-autocomplete/paper-autocomplete.html">
 
 
 <!-- <link rel="import" href="../../bower_components/web-animations-js/web-animations-next-lite.min.js"> -->
@@ -28,6 +32,9 @@
 <link rel="import" href="../material-styles/shadow.html">
 <link rel="import" href="../material-styles/default-theme.html">
 <link rel="import" href="../material-styles/color.html">
+
+<link rel="import" href="../page/sr-add-page.html">
+<link rel="import" href="../page/sr-delete-page.html">
 
 <link rel="lazy-import" href="../account/sr-account-app.html">
 <link rel="lazy-import" href="../page/sr-page-app.html">
@@ -96,7 +103,6 @@
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
-
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="sr-icons:menu" drawer-toggle></paper-icon-button>
@@ -114,15 +120,13 @@
               <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
               <paper-listbox slot="dropdown-content">
                 <template is="dom-repeat" items="{{menuItems}}">
-                  <paper-icon-item>
-                    <iron-icon icon="sr-icons:{{item.icon}}" slot="item-icon"></iron-icon>
-                    {{item.title}}
-                  </paper-icon-item>
+   <!--                <a class="route-link" href="[[route.prefix]][[route.path]]/[[item.action]]" tabindex="-1"> -->
+                    <paper-icon-item on-tap="triggerMenuItemAction" value="{{item}}">
+                      <iron-icon icon="sr-icons:{{item.icon}}" slot="item-icon"></iron-icon>
+                      {{item.title}}
+                    </paper-icon-item>
+                  <!-- </a> -->
                 </template>
-                <!-- <paper-icon-item name="deletePage">
-                  <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
-                  Delete page
-                </paper-icon-item> -->
               </paper-listbox>
             </paper-menu-button>
           </app-toolbar>
@@ -142,15 +146,18 @@
       </app-header-layout>
     </app-drawer-layout>
     <paper-dialog id="searchDialog" modal>
-      <h2>Header</h2>
+      <h2>Search</h2>
       <paper-dialog-scrollable>
-        Lorem ipsum...
+        <p>Searching is not yet available.</p>
+        <p>Follow development on the <a href="https://github.com/rhyeen/sr_creation/projects/10" target="_blank">Github Search Bar Project Page</a>.</p>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button dialog-confirm autofocus>Accept</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
+    <sr-add-page id="addPageDialog"></sr-add-page>
+    <sr-delete-page id="deletePageDialog"></sr-delete-page>
   </template>
 
   <script>
@@ -185,6 +192,8 @@
         this._updateMenuTitle(path);
       }
 
+
+
       _updateMenuTitle(path) {
         var pathParts = path.split('/');
         if (pathParts.length == 4) {
@@ -194,11 +203,13 @@
             this.set('menuItems', [
               {
                 title: 'New Page',
-                icon: 'page-add'
+                icon: 'page-add',
+                action: 'toggleNewPage'
               },
               {
                 title: 'Delete Page',
-                icon: 'delete'
+                icon: 'delete',
+                action: 'toggleDeletePage'
               }
             ]);
             return this.set('menuTitle', 'Page Summary');
@@ -382,6 +393,26 @@
 
       toggleSearchDialog() {
         this.$.searchDialog.toggle();
+      }
+
+      triggerMenuItemAction(event) {
+        // ensure the menu closes
+        event.currentTarget.parentElement.parentElement.close();
+        var item = event.currentTarget.value;
+        if (item.action == 'toggleNewPage') {
+          this.toggleNewPage();
+        } else if (item.action == 'toggleDeletePage') {
+          this.toggleDeletePage(item.actionParams);
+        }
+      }
+
+      toggleDeletePage(params) {
+        this.$.deletePageDialog.pageId = this.subRoute.path.split('/')[1];
+        this.$.deletePageDialog.toggle();
+      }
+
+      toggleNewPage() {
+        this.$.addPageDialog.toggle();
       }
 
       goBack() {

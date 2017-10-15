@@ -29,7 +29,9 @@
     "iron-collapse": "PolymerElements/iron-collapse#^2.0.0",
     "paper-input": "PolymerElements/paper-input#^2.0.2",
     "paper-fab": "PolymerElements/paper-fab#^2.0.0",
-    "iron-ajax": "PolymerElements/iron-ajax#^2.0.5"
+    "iron-ajax": "PolymerElements/iron-ajax#^2.0.5",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0",
+    "paper-autocomplete": "ellipticaljs/paper-autocomplete#^3.3.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"

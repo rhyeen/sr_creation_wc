@@ -30,10 +30,6 @@
         right: 20px;
       }
 
-      a {
-        color: inherit;
-        text-decoration: inherit;
-      }
     </style>
     <app-route
         route="{{route}}"
@@ -64,7 +60,7 @@
             <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.summary.text}}</iron-collapse>
           </div>
           <div class="card-actions">
-            <a href="{{getPageLinkUrl(contextItem)}}" tabindex="-1">
+            <a class="route-link" href="{{getPageLinkUrl(contextItem)}}" tabindex="-1">
               <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Go to Page</paper-button>
             </a>
           </div>
