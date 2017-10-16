@@ -38,7 +38,7 @@
           </template>
         </app-toolbar>
         <template is="dom-if" if="{{showRelatedPages(page)}}">
-          <div class="related-pages">
+          <div class="related-pages card-action-list">
             <template is="dom-repeat" items="{{page.pages}}">
               <template is="dom-if" if="{{!reorderingPages}}">
                 <a class="route-link" href="{{route.prefix}}/related-pages/{{item.type}}" tabindex="-1">

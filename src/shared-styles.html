@@ -13,9 +13,18 @@
         --paper-badge-height: 25px;
       }
 
-      paper-item .title {
+      .card-action-list paper-item .title {
         min-width: 100px;
         text-transform: capitalize;
+      }
+
+      .card-action-list paper-item {
+        /*margin: 0 -16px;
+        padding: 0 16px;*/
+        border-top: 1px solid var(--divider-color);
+        @apply(--paper-font-button);
+        text-transform: none;
+        font-size: 18px;
       }
 
       paper-button iron-icon {
@@ -26,15 +35,6 @@
         margin: 10px;
         max-width: 500px;
         width: calc(100% - 20px);
-      }
-
-      paper-item {
-        /*margin: 0 -16px;
-        padding: 0 16px;*/
-        border-top: 1px solid var(--divider-color);
-        @apply(--paper-font-button);
-        text-transform: none;
-        font-size: 18px;
       }
 
       paper-listbox paper-icon-item {

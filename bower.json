@@ -31,7 +31,9 @@
     "paper-fab": "PolymerElements/paper-fab#^2.0.0",
     "iron-ajax": "PolymerElements/iron-ajax#^2.0.5",
     "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0",
-    "paper-autocomplete": "ellipticaljs/paper-autocomplete#^3.3.0"
+    "paper-autocomplete": "ellipticaljs/paper-autocomplete#^3.3.0",
+    "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"

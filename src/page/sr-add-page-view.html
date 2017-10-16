@@ -5,15 +5,41 @@
         color: #fff;
         background-color: var(--app-primary-color);
       }
+
+      paper-item {
+        text-transform: capitalize;
+      }
+
+
     </style>
     <paper-card>
       <div class="card-content">
+        <paper-toggle-button
+            checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
+        <paper-autocomplete
+            id="linkedPageInput"
+            label="Linked Page"
+            source="[[linkedPageSources]]"
+            required
+            text="{{linkedPageText}}"
+            value="{{linkedPageValue}}"
+            disabled="[[linkToPreviousPage]]"
+            show-results-on-focus></paper-autocomplete>
+        <h3>New Page Properties</h3>
+        <paper-dropdown-menu label="Page Type">
+          <paper-listbox slot="dropdown-content" class="dropdown-content">
+            <template is="dom-repeat" items="{{pageTypes}}">
+              <paper-item>{{item}}</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
         <paper-autocomplete
             id="titleInput"
             label="Title"
             source="[[titleSearches]]"
             required
             show-results-on-focus></paper-autocomplete>
+        <paper-textarea label="Summary"></paper-textarea>
       </div>
     </paper-card>
   </template>
@@ -27,18 +53,84 @@
           titleSearches: {
             type: Array,
             value: []
+          },
+          linkedPageSources: {
+            type: Array,
+            value: []
+          },
+          linkToPreviousPage: {
+            type: Boolean,
+            value: true
+          },
+          linkedPageText: {
+            type: String,
+            value: null
+          },
+          linkedPageValue: {
+            type: String,
+            value: null
+          },
+          pageTypes: {
+            type: Array,
+            value: []
           }
         };
       }
 
-      toggle() {
-        this.$.addPageDialog.toggle();
-        // this.$.titleInput.queryFn = this.newQueryFn;
-        var newSearch = this.newQueryFn();
+      static get observers() {
+        return [
+          '_linkToPreviousPageChanged(linkToPreviousPage)'
+        ];
+      }
+
+      constructor() {
+        super();
+        this._setLinkedPageDefaults();
+        this._setPageTypes();
+        // this.$.titleInput.queryFn = this._newQueryFn;
+        var newSearch = this._newQueryFn();
         this.set('titleSearches', newSearch);
       }
 
-      newQueryFn() {
+      _linkToPreviousPageChanged(linkToPreviousPage) {
+        if (linkToPreviousPage) {
+          this._setLinkedPageDefaults();
+        }
+      }
+
+      _setLinkedPageDefaults() {
+        this.set('linkedPageText', this.page.name);
+        this.set('linkedPageValue', this.page.id);
+      }
+
+      _setPageTypes() {
+        this.set('pageTypes', [
+          'Association',
+          'Campaign',
+          'Character',
+          'District',
+          'Era',
+          'Event',
+          'Group',
+          'History',
+          'Item',
+          'Landmark',
+          'Lore',
+          'Place',
+          'Quest',
+          'Race',
+          'Region',
+          'Report',
+          'Section',
+          'Set',
+          'Species',
+          'Story arc',
+          'Taxon',
+          'World',
+        ]);
+      }
+
+      _newQueryFn() {
         return [
         {"text": "Alabama", "value": "AL"},
         {"text": "Alaska", "value": "AK"},
