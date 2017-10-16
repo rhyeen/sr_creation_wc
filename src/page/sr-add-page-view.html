@@ -1,27 +1,26 @@
-<dom-module id="sr-add-page">
+<dom-module id="sr-add-page-view">
   <template>
     <style include="shared-styles">
-      paper-dialog {
-        min-width: 300px;
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
       }
     </style>
-    <!-- <paper-autocomplete id="titleInput" label="Title" source="[[titleSearches]]" required show-results-on-focus></paper-autocomplete> -->
-    <paper-dialog id="addPageDialog" modal>
-      <h2>Add Page</h2>
-      <paper-dialog-scrollable>
-        <!-- <paper-input label="Title"></paper-input> -->
-        <paper-autocomplete id="titleInput" label="Title" source="[[titleSearches]]" required show-results-on-focus></paper-autocomplete>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-confirm autofocus>Accept</paper-button>
-        <paper-button dialog-dismiss>Cancel</paper-button>
+    <paper-card>
+      <div class="card-content">
+        <paper-autocomplete
+            id="titleInput"
+            label="Title"
+            source="[[titleSearches]]"
+            required
+            show-results-on-focus></paper-autocomplete>
       </div>
-    </paper-dialog>
+    </paper-card>
   </template>
 
   <script>
-    class SrAddPage extends Polymer.Element {
-      static get is() { return 'sr-add-page'; }
+    class SrAddPageView extends Polymer.Element {
+      static get is() { return 'sr-add-page-view'; }
 
       static get properties() {
         return {
@@ -104,6 +103,6 @@
       }
     }
 
-    window.customElements.define(SrAddPage.is, SrAddPage);
+    window.customElements.define(SrAddPageView.is, SrAddPageView);
   </script>
 </dom-module>

@@ -33,7 +33,6 @@
 <link rel="import" href="../material-styles/default-theme.html">
 <link rel="import" href="../material-styles/color.html">
 
-<link rel="import" href="../page/sr-add-page.html">
 <link rel="import" href="../page/sr-delete-page.html">
 
 <link rel="lazy-import" href="../account/sr-account-app.html">
@@ -61,6 +60,12 @@
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
+      }
+
+      .confirm-btn {
+        padding: 5px 15px;
+        min-width: auto;
+        text-transform: capitalize;
       }
     </style>
 
@@ -105,30 +110,56 @@
       <app-header-layout has-scrolling-region>
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
-            <paper-icon-button icon="sr-icons:menu" drawer-toggle></paper-icon-button>
+            <paper-icon-button
+                icon="sr-icons:menu"
+                disabled="[[disableMenuConfirmation]]"
+                drawer-toggle></paper-icon-button>
             <div main-title>SR Creation</div>
           </app-toolbar>
           <!-- <div class="page-title" sticky>Prophecy of the Bloodmoon God</div> -->
           <app-toolbar class="page-title" sticky>
             <template is="dom-if" if="{{showBackButton}}">
-              <paper-icon-button icon="sr-icons:arrow-back" on-tap="goBack"></paper-icon-button>
+              <paper-icon-button
+                  icon="sr-icons:arrow-back"
+                  on-tap="goBack"
+                  disabled="[[disableMenuConfirmation]]"></paper-icon-button>
             </template>
             <div main-title>{{menuTitle}}
             </div>
-            <paper-icon-button icon="sr-icons:search" on-tap="toggleSearchDialog"></paper-icon-button>
-            <paper-menu-button dynamic-align="true">
-              <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
-              <paper-listbox slot="dropdown-content">
-                <template is="dom-repeat" items="{{menuItems}}">
-   <!--                <a class="route-link" href="[[route.prefix]][[route.path]]/[[item.action]]" tabindex="-1"> -->
-                    <paper-icon-item on-tap="triggerMenuItemAction" value="{{item}}">
-                      <iron-icon icon="sr-icons:{{item.icon}}" slot="item-icon"></iron-icon>
-                      {{item.title}}
-                    </paper-icon-item>
-                  <!-- </a> -->
-                </template>
-              </paper-listbox>
-            </paper-menu-button>
+            <template is="dom-if" if="{{showMenuConfirmation}}">
+              <paper-button
+                  class="btn-primary confirm-btn"
+                  on-tap="confirmMenu"
+                  disabled="[[disableMenuConfirmation]]"
+                  raised>Save</paper-button>
+            </template>
+            <template is="dom-if" if="{{!showMenuConfirmation}}">
+              <paper-icon-button icon="sr-icons:search" on-tap="toggleSearchDialog"></paper-icon-button>
+              <paper-menu-button dynamic-align="true">
+                <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+                <paper-listbox slot="dropdown-content">
+                  <template is="dom-repeat" items="{{menuItems}}">
+                    <template is="dom-if" if="[[!item.link]]">
+                      <paper-icon-item on-tap="triggerMenuItemAction" value="{{item}}">
+                        <iron-icon icon="sr-icons:{{item.icon}}" slot="item-icon"></iron-icon>
+                        {{item.title}}
+                      </paper-icon-item>
+                    </template>
+                    <template is="dom-if" if="[[item.link]]">
+                     <a
+                        class="route-link"
+                        href="[[item.link]]"
+                        tabindex="-1">
+                       <paper-icon-item value="{{item}}">
+                         <iron-icon icon="sr-icons:{{item.icon}}" slot="item-icon"></iron-icon>
+                         {{item.title}}
+                       </paper-icon-item>
+                     </a>
+                    </template>
+                  </template>
+                </paper-listbox>
+              </paper-menu-button>
+            </template>
           </app-toolbar>
         </app-header>
 
@@ -156,7 +187,6 @@
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
-    <sr-add-page id="addPageDialog"></sr-add-page>
     <sr-delete-page id="deletePageDialog"></sr-delete-page>
   </template>
 
@@ -177,6 +207,14 @@
           backPath: {
             type: String,
             value: false
+          },
+          showMenuConfirmation: {
+            type: Boolean,
+            value: false
+          },
+          disableMenuConfirmation: {
+            type: Boolean,
+            value: false
           }
         };
       }
@@ -192,31 +230,47 @@
         this._updateMenuTitle(path);
       }
 
+      _getAddPageLink(pathParts) {
+        return '/' + pathParts[1] + '/' + pathParts[2] + '/add-page';
+      }
 
+      confirmMenu(event) {
+        this.set('route.path', this.route.path + '/confirm');
+      }
 
       _updateMenuTitle(path) {
         var pathParts = path.split('/');
+        var showBackButton = false;
+        var menuItems = false;
+        var menuTitle = null;
+        var showMenuConfirmation = false;
+        // we want the menu to appear the same if confirm is added,
+        // but we also want to disable further clicks
+        if (pathParts[pathParts.length - 1] == 'confirm') {
+          this.set('disableMenuConfirmation', true);
+          pathParts.pop();
+        } else {
+          this.set('disableMenuConfirmation', false);
+        }
         if (pathParts.length == 4) {
           var context = pathParts[3];
           if (context == 'summary') {
-            this.set('showBackButton', false);
-            this.set('menuItems', [
+            menuItems = [
               {
                 title: 'New Page',
                 icon: 'page-add',
-                action: 'toggleNewPage'
+                link: this._getAddPageLink(pathParts)
               },
               {
                 title: 'Delete Page',
                 icon: 'delete',
                 action: 'toggleDeletePage'
               }
-            ]);
-            return this.set('menuTitle', 'Page Summary');
-          }
-          if (context == 'detail') {
-            this.set('showBackButton', true);
-            this.set('menuItems', [
+            ];
+            menuTitle = 'Page Summary';
+          } else if (context == 'detail') {
+            showBackButton = true;
+            menuItems = [
               {
                 title: 'New Detail',
                 icon: 'add-circle'
@@ -225,12 +279,11 @@
                 title: 'Reorder Details',
                 icon: 'reorder'
               }
-            ]);
-            return this.set('menuTitle', 'Details');
-          }
-          if (context == 'image') {
-            this.set('showBackButton', true);
-            this.set('menuItems', [
+            ];
+            menuTitle = 'Details';
+          } else if (context == 'image') {
+            showBackButton = true;
+            menuItems = [
               {
                 title: 'New Image',
                 icon: 'add-circle'
@@ -239,15 +292,18 @@
                 title: 'Reorder Images',
                 icon: 'reorder'
               }
-            ]);
-            return this.set('menuTitle', 'Images');
+            ];
+            menuTitle = 'Images';
+          } else if (context == 'add-page') {
+            showBackButton = true;
+            showMenuConfirmation = true;
+            menuTitle = 'Add Page';
           }
-        }
-        if (pathParts.length == 5) {
+        } else if (pathParts.length == 5) {
           if (pathParts[3] == 'related-pages') {
             var relatedPageType = pathParts[4];
-            this.set('showBackButton', true);
-            this.set('menuItems', [
+            showBackButton = true;
+            menuItems = [
               {
                 title: this._getRelatedPageAddPageTitle(relatedPageType),
                 icon: 'add-circle'
@@ -256,11 +312,14 @@
                 title: this._getRelatedPageReorderPageTitle(relatedPageType),
                 icon: 'reorder'
               }
-            ]);
-            return this.set('menuTitle', this._getRelatedPageMenuTitle(relatedPageType));
+            ];
+            menuTitle = this._getRelatedPageMenuTitle(relatedPageType);
           }
         }
-        return this.set('menuTitle', 'Page');
+        this.set('showBackButton', showBackButton);
+        this.set('menuItems', menuItems);
+        this.set('menuTitle', menuTitle);
+        this.set('showMenuConfirmation', showMenuConfirmation);
       }
 
       _getRelatedPageAddPageTitle(relatedPageType) {
@@ -399,9 +458,7 @@
         // ensure the menu closes
         event.currentTarget.parentElement.parentElement.close();
         var item = event.currentTarget.value;
-        if (item.action == 'toggleNewPage') {
-          this.toggleNewPage();
-        } else if (item.action == 'toggleDeletePage') {
+        if (item.action == 'toggleDeletePage') {
           this.toggleDeletePage(item.actionParams);
         }
       }
@@ -409,10 +466,6 @@
       toggleDeletePage(params) {
         this.$.deletePageDialog.pageId = this.subRoute.path.split('/')[1];
         this.$.deletePageDialog.toggle();
-      }
-
-      toggleNewPage() {
-        this.$.addPageDialog.toggle();
       }
 
       goBack() {

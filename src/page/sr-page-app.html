@@ -17,6 +17,8 @@
 <link rel="lazy-import" href="sr-summary-view.html">
 <link rel="lazy-import" href="sr-related-pages-view.html">
 <link rel="lazy-import" href="sr-page-relation-view.html">
+<link rel="lazy-import" href="../page/sr-add-page-view.html">
+
 
 <link rel="import" href="../shared-styles.html">
 <link rel="import" href="../tools/sr-icons.html">
@@ -48,6 +50,9 @@
     <sr-page-relation-view
         route="[[subRoute]]"
         page="[[page]]"></sr-page-relation-view>
+    <sr-add-page-view
+        route="[[subRoute]]"
+        page="[[page]]"></sr-add-page-view>
     <iron-ajax
         auto
         url="http://localhost:4000/user/page"
@@ -101,6 +106,11 @@
             true);
         Polymer.importHref(
             'src/page/sr-page-relation-view.html',
+            null,
+            null,
+            true);
+        Polymer.importHref(
+            'src/page/sr-add-page-view.html',
             null,
             null,
             true);
