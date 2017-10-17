@@ -1,47 +1,67 @@
 <dom-module id="sr-add-page-view">
   <template>
     <style include="shared-styles">
-      app-header {
-        color: #fff;
-        background-color: var(--app-primary-color);
+      .top-padded {
+        margin-top: 20px;
       }
-
-      paper-item {
-        text-transform: capitalize;
-      }
-
-
     </style>
     <paper-card>
       <div class="card-content">
-        <paper-toggle-button
-            checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
-        <paper-autocomplete
-            id="linkedPageInput"
-            label="Linked Page"
-            source="[[linkedPageSources]]"
-            required
-            text="{{linkedPageText}}"
-            value="{{linkedPageValue}}"
-            disabled="[[linkToPreviousPage]]"
-            show-results-on-focus></paper-autocomplete>
-        <h3>New Page Properties</h3>
-        <paper-dropdown-menu label="Page Type">
-          <paper-listbox slot="dropdown-content" class="dropdown-content">
-            <template is="dom-repeat" items="{{pageTypes}}">
-              <paper-item>{{item}}</paper-item>
-            </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <paper-autocomplete
-            id="titleInput"
-            label="Title"
-            source="[[titleSearches]]"
-            required
-            show-results-on-focus></paper-autocomplete>
-        <paper-textarea label="Summary"></paper-textarea>
+        <paper-radio-group selected="{{creationAction}}">
+          <paper-radio-button name="link">Bind to an existing page</paper-radio-button>
+          <paper-radio-button name="new">Create a new page</paper-radio-button>
+        </paper-radio-group>
       </div>
     </paper-card>
+    <template is="dom-if" if="[[shouldCreateNewPage(creationAction)]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>Create a new page</div>
+        </app-toolbar>
+        <div class="card-content">
+          <paper-dropdown-menu label="Page Type">
+            <paper-listbox slot="dropdown-content" class="dropdown-content">
+              <template is="dom-repeat" items="{{pageTypes}}">
+                <paper-item>{{item}}</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-input
+              label="Title"
+              required></paper-input>
+          <paper-textarea label="Summary"></paper-textarea>
+        </div>
+        <div class="card-actions">
+          <paper-toggle-button
+              class="top-padded"
+              checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
+          <paper-autocomplete
+              id="linkedPageInput"
+              label="Linked Page"
+              source="[[linkedPageSources]]"
+              required
+              text="{{linkedPageText}}"
+              value="{{linkedPageValue}}"
+              disabled="[[linkToPreviousPage]]"
+              show-results-on-focus></paper-autocomplete>
+        </div>
+      </paper-card>
+    </template>
+    <template is="dom-if" if="[[!shouldCreateNewPage(creationAction)]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>Bind to an existing page</div>
+        </app-toolbar>
+        <div class="card-content">
+          <paper-autocomplete
+              id="titleInput"
+              label="Title"
+              source="[[titleSearches]]"
+              required
+              show-results-on-focus></paper-autocomplete>
+        </div>
+      </paper-card>
+    </template>
   </template>
 
   <script>
@@ -73,6 +93,10 @@
           pageTypes: {
             type: Array,
             value: []
+          },
+          creationAction: {
+            type: String,
+            value: 'link'
           }
         };
       }
@@ -81,6 +105,10 @@
         return [
           '_linkToPreviousPageChanged(linkToPreviousPage)'
         ];
+      }
+
+      shouldCreateNewPage(creationAction) {
+        return creationAction == 'new';
       }
 
       constructor() {
