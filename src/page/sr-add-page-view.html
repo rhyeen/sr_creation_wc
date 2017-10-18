@@ -4,64 +4,77 @@
       .top-padded {
         margin-top: 20px;
       }
+
+      paper-radio-group {
+        margin: 20px;
+      }
     </style>
-    <paper-card>
-      <div class="card-content">
-        <paper-radio-group selected="{{creationAction}}">
-          <paper-radio-button name="link">Bind to an existing page</paper-radio-button>
-          <paper-radio-button name="new">Create a new page</paper-radio-button>
-        </paper-radio-group>
-      </div>
-    </paper-card>
-    <template is="dom-if" if="[[shouldCreateNewPage(creationAction)]]">
-      <paper-card>
-        <app-toolbar>
-          <div main-title>Create a new page</div>
-        </app-toolbar>
-        <div class="card-content">
-          <paper-dropdown-menu label="Page Type">
-            <paper-listbox slot="dropdown-content" class="dropdown-content">
-              <template is="dom-repeat" items="{{pageTypes}}">
-                <paper-item>{{item}}</paper-item>
-              </template>
-            </paper-listbox>
-          </paper-dropdown-menu>
-          <paper-input
-              label="Title"
-              required></paper-input>
-          <paper-textarea label="Summary"></paper-textarea>
-        </div>
-        <div class="card-actions">
-          <paper-toggle-button
-              class="top-padded"
-              checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
-          <paper-autocomplete
-              id="linkedPageInput"
-              label="Linked Page"
-              source="[[linkedPageSources]]"
-              required
-              text="{{linkedPageText}}"
-              value="{{linkedPageValue}}"
-              disabled="[[linkToPreviousPage]]"
-              show-results-on-focus></paper-autocomplete>
-        </div>
-      </paper-card>
+    <app-route
+        route="{{route}}"
+        pattern="/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <template is="dom-if" if="[[showView]]">
+      <paper-radio-group selected="{{creationAction}}">
+        <paper-radio-button name="link">Bind to an existing page</paper-radio-button>
+        <paper-radio-button name="new">Create a new page</paper-radio-button>
+      </paper-radio-group>
+      <template is="dom-if" if="[[shouldCreateNewPage(creationAction)]]">
+        <paper-card>
+          <app-toolbar>
+            <div main-title>Create a new page</div>
+          </app-toolbar>
+          <div class="card-content">
+            <paper-dropdown-menu label="Page Type">
+              <paper-listbox slot="dropdown-content" class="dropdown-content">
+                <template is="dom-repeat" items="{{pageTypes}}">
+                  <paper-item>{{item}}</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input
+                label="New Page Title"
+                required></paper-input>
+            <paper-textarea label="Summary"></paper-textarea>
+          </div>
+          <div class="card-actions">
+            <paper-toggle-button
+                class="top-padded"
+                checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
+            <paper-autocomplete
+                label="Linked Page"
+                source="[[linkedPageSources]]"
+                required
+                text="{{linkedPageText}}"
+                value="{{linkedPageValue}}"
+                disabled="[[linkToPreviousPage]]"
+                show-results-on-focus></paper-autocomplete>
+          </div>
+        </paper-card>
+      </template>
+      <template is="dom-if" if="[[!shouldCreateNewPage(creationAction)]]">
+        <paper-card>
+          <app-toolbar>
+            <div main-title>Bind to an existing page</div>
+          </app-toolbar>
+          <div class="card-content">
+            <paper-autocomplete
+                id="pageSearchInput"
+                label="Search for Page"
+                required
+                source="[[titleSearches]]"
+                text="{{searchPageText}}"
+                show-results-on-focus></paper-autocomplete>
+          </div>
+        </paper-card>
+      </template>
     </template>
-    <template is="dom-if" if="[[!shouldCreateNewPage(creationAction)]]">
-      <paper-card>
-        <app-toolbar>
-          <div main-title>Bind to an existing page</div>
-        </app-toolbar>
-        <div class="card-content">
-          <paper-autocomplete
-              id="titleInput"
-              label="Title"
-              source="[[titleSearches]]"
-              required
-              show-results-on-focus></paper-autocomplete>
-        </div>
-      </paper-card>
-    </template>
+    <iron-ajax
+        id="getSearchPageResultsAjax"
+        url="http://localhost:4000/user/page/search"
+        handle-as="json"
+        on-response="handleSearchPageResults"
+        debounce-duration="300"></iron-ajax>
   </template>
 
   <script>
@@ -97,27 +110,83 @@
           creationAction: {
             type: String,
             value: 'link'
-          }
+          },
+          searchPageText: {
+            type: String,
+            value: null
+          },
+          searchPageParams: {
+            type: Object,
+            value: {}
+          },
+          showView: Boolean
         };
       }
 
       static get observers() {
         return [
-          '_linkToPreviousPageChanged(linkToPreviousPage)'
+          '_linkToPreviousPageChanged(linkToPreviousPage)',
+          '_searchPageTextChanged(searchPageText)',
+          '_routeDataChanged(routeData)',
         ];
-      }
-
-      shouldCreateNewPage(creationAction) {
-        return creationAction == 'new';
       }
 
       constructor() {
         super();
         this._setLinkedPageDefaults();
         this._setPageTypes();
-        // this.$.titleInput.queryFn = this._newQueryFn;
-        var newSearch = this._newQueryFn();
-        this.set('titleSearches', newSearch);
+        // this.$.pageSearchInput.queryFn = this.searchQueryResults;
+        // var newSearch = this.searchQueryResults();
+        // this.set('titleSearches', newSearch);
+      }
+
+      _routeDataChanged(routeData) {
+        var context = routeData.context;
+        // console.log('Add Page');
+        // console.log(this.route);
+        // console.log(this.subRoute);
+        // console.log(this.contextItem);
+        this.set('hasContextItem', !!this.contextItem);
+        this.set('showView', context == 'add-page');
+      }
+
+      _setComponentProperties() {
+        var pageSearchInput = this.shadowRoot.querySelector("#pageSearchInput");
+        pageSearchInput.queryFn = this.searchQueryResults;
+      }
+
+      _searchPageTextChanged(searchPageText) {
+        this._retrieveTitlePageSearchResults(searchPageText);
+      }
+
+      _retrieveTitlePageSearchResults(searchQuery) {
+        if (!searchQuery || searchQuery.length < 2) {
+          this.set('titleSearches', []);
+          return;
+        }
+        this._setComponentProperties();
+        var params = {
+          query: searchQuery,
+          type: 'CH'
+        };
+        this.set('searchPageParams', params);
+        this.$.getSearchPageResultsAjax.params = params;
+        this.$.getSearchPageResultsAjax.generateRequest();
+      }
+
+      handleSearchPageResults(event) {
+        var searchResults = [];
+        event.detail.response.forEach(function(result) {
+          searchResults.push({
+            text: result.name,
+            value: result.id
+          });
+        });
+        this.set('titleSearches', searchResults);
+      }
+
+      shouldCreateNewPage(creationAction) {
+        return creationAction == 'new';
       }
 
       _linkToPreviousPageChanged(linkToPreviousPage) {
@@ -158,68 +227,9 @@
         ]);
       }
 
-      _newQueryFn() {
-        return [
-        {"text": "Alabama", "value": "AL"},
-        {"text": "Alaska", "value": "AK"},
-        {"text": "American Samoa", "value": "AS"},
-        {"text": "Arizona", "value": "AZ"},
-        {"text": "Arkansas", "value": "AR"},
-        {"text": "California", "value": "CA"},
-        {"text": "Colorado", "value": "CO"},
-        {"text": "Connecticut", "value": "CT"},
-        {"text": "Delaware", "value": "DE"},
-        {"text": "District Of Columbia", "value": "DC"},
-        {"text": "Federated States Of Micronesia", "value": "FM"},
-        {"text": "Florida", "value": "FL"},
-        {"text": "Georgia", "value": "GA"},
-        {"text": "Guam", "value": "GU"},
-        {"text": "Hawaii", "value": "HI"},
-        {"text": "Idaho", "value": "ID"},
-        {"text": "Illinois", "value": "IL"},
-        {"text": "Indiana", "value": "IN"},
-        {"text": "Iowa", "value": "IA"},
-        {"text": "Kansas", "value": "KS"},
-        {"text": "Kentucky", "value": "KY"},
-        {"text": "Louisiana", "value": "LA"},
-        {"text": "Maine", "value": "ME"},
-        {"text": "Marshall Islands", "value": "MH"},
-        {"text": "Maryland", "value": "MD"},
-        {"text": "Massachusetts", "value": "MA"},
-        {"text": "Michigan", "value": "MI"},
-        {"text": "Minnesota", "value": "MN"},
-        {"text": "Mississippi", "value": "MS"},
-        {"text": "Missouri", "value": "MO"},
-        {"text": "Montana", "value": "MT"},
-        {"text": "Nebraska", "value": "NE"},
-        {"text": "Nevada", "value": "NV"},
-        {"text": "New Hampshire", "value": "NH"},
-        {"text": "New Jersey", "value": "NJ"},
-        {"text": "New Mexico", "value": "NM"},
-        {"text": "New York", "value": "NY"},
-        {"text": "North Carolina", "value": "NC"},
-        {"text": "North Dakota", "value": "ND"},
-        {"text": "Northern Mariana Islands", "value": "MP"},
-        {"text": "Ohio", "value": "OH"},
-        {"text": "Oklahoma", "value": "OK"},
-        {"text": "Oregon", "value": "OR"},
-        {"text": "Palau", "value": "PW"},
-        {"text": "Pennsylvania", "value": "PA"},
-        {"text": "Puerto Rico", "value": "PR"},
-        {"text": "Rhode Island", "value": "RI"},
-        {"text": "South Carolina", "value": "SC"},
-        {"text": "South Dakota", "value": "SD"},
-        {"text": "Tennessee", "value": "TN"},
-        {"text": "Texas", "value": "TX"},
-        {"text": "Utah", "value": "UT"},
-        {"text": "Vermont", "value": "VT"},
-        {"text": "Virgin Islands", "value": "VI"},
-        {"text": "Virginia", "value": "VA"},
-        {"text": "Washington", "value": "WA"},
-        {"text": "West Virginia", "value": "WV"},
-        {"text": "Wisconsin", "value": "WI"},
-        {"text": "Wyoming", "value": "WY"}
-      ];
+      searchQueryResults(backEndResults, query) {
+        console.log(query);
+        return backEndResults;
       }
     }
 
