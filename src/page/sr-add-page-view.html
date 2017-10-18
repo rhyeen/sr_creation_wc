@@ -5,6 +5,26 @@
         margin-top: 20px;
       }
 
+      .selected-item {
+        width: 100%;
+        background-color: var(--paper-indigo-500);
+        color: white;
+        height: 47px;
+        line-height: 47px;
+        margin: 8px 0;
+        border-radius: 47px;
+      }
+
+      .selected-item span {
+        padding: 0 23.5px;
+        font-weight: 500;
+      }
+
+      .selected-item paper-icon-button {
+        float: right;
+        margin: 3.5px;
+      }
+
       paper-radio-group {
         margin: 20px;
       }
@@ -58,12 +78,20 @@
             <div main-title>Bind to an existing page</div>
           </app-toolbar>
           <div class="card-content">
-            <paper-autocomplete
-                id="pageSearchInput"
-                label="Search for Page"
-                required
-                remote-source
-                show-results-on-focus></paper-autocomplete>
+            <template is="dom-if" if="[[!pageSearchResult.text]]">
+              <paper-autocomplete
+                  id="pageSearchInput"
+                  label="Search for Page"
+                  required
+                  remote-source
+                  show-results-on-focus></paper-autocomplete>
+            </template>
+            <template is="dom-if" if="[[pageSearchResult.text]]">
+              <div class="selected-item">
+                <span>{{pageSearchResult.text}}</span>
+                <paper-icon-button icon="sr-icons:close" on-tap="clearPageSearchResult"></paper-icon-button>
+              </div>
+            </template>
           </div>
         </paper-card>
       </template>
@@ -114,7 +142,11 @@
             type: Object,
             value: {}
           },
-          showView: Boolean
+          showView: Boolean,
+          pageSearchResult: {
+            type: Object,
+            value: {}
+          }
         };
       }
 
@@ -137,10 +169,22 @@
       ready() {
         super.ready();
         this.addEventListener('autocomplete-change', e => this._autocompleteChangeListener(e));
+        this.addEventListener('autocomplete-selected', e => this._autocompleteSelectedListener(e));
       }
 
       _autocompleteChangeListener(event) {
         this._retrieveTitlePageSearchResults(event.detail.text);
+      }
+
+      _autocompleteSelectedListener(event) {
+        this.set('pageSearchResult', {
+          value: event.detail.value,
+          text: event.detail.text
+        }); 
+      }
+
+      clearPageSearchResult() {
+        this.set('pageSearchResult', {});
       }
 
       _routeDataChanged(routeData) {
