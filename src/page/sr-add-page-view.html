@@ -62,8 +62,7 @@
                 id="pageSearchInput"
                 label="Search for Page"
                 required
-                source="[[titleSearches]]"
-                text="{{searchPageText}}"
+                remote-source
                 show-results-on-focus></paper-autocomplete>
           </div>
         </paper-card>
@@ -111,10 +110,6 @@
             type: String,
             value: 'link'
           },
-          searchPageText: {
-            type: String,
-            value: null
-          },
           searchPageParams: {
             type: Object,
             value: {}
@@ -126,7 +121,6 @@
       static get observers() {
         return [
           '_linkToPreviousPageChanged(linkToPreviousPage)',
-          '_searchPageTextChanged(searchPageText)',
           '_routeDataChanged(routeData)',
         ];
       }
@@ -140,6 +134,15 @@
         // this.set('titleSearches', newSearch);
       }
 
+      ready() {
+        super.ready();
+        this.addEventListener('autocomplete-change', e => this._autocompleteChangeListener(e));
+      }
+
+      _autocompleteChangeListener(event) {
+        this._retrieveTitlePageSearchResults(event.detail.text);
+      }
+
       _routeDataChanged(routeData) {
         var context = routeData.context;
         // console.log('Add Page');
@@ -150,21 +153,11 @@
         this.set('showView', context == 'add-page');
       }
 
-      _setComponentProperties() {
-        var pageSearchInput = this.shadowRoot.querySelector("#pageSearchInput");
-        pageSearchInput.queryFn = this.searchQueryResults;
-      }
-
-      _searchPageTextChanged(searchPageText) {
-        this._retrieveTitlePageSearchResults(searchPageText);
-      }
-
       _retrieveTitlePageSearchResults(searchQuery) {
         if (!searchQuery || searchQuery.length < 2) {
-          this.set('titleSearches', []);
+          this._setSearchSuggestions([]);
           return;
         }
-        this._setComponentProperties();
         var params = {
           query: searchQuery,
           type: 'CH'
@@ -182,7 +175,15 @@
             value: result.id
           });
         });
-        this.set('titleSearches', searchResults);
+        this._setSearchSuggestions(searchResults);
+      }
+
+      _setSearchSuggestions(searchResults) {
+        var paperSearchInput = this.shadowRoot.querySelector("#" + "pageSearchInput");
+        if (!paperSearchInput) {
+          return;
+        }
+        paperSearchInput.suggestions(searchResults);
       }
 
       shouldCreateNewPage(creationAction) {
@@ -225,11 +226,6 @@
           'Taxon',
           'World',
         ]);
-      }
-
-      searchQueryResults(backEndResults, query) {
-        console.log(query);
-        return backEndResults;
       }
     }
 
