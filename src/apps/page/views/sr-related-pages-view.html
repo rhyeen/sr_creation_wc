@@ -1,0 +1,272 @@
+<link rel="import" href="../cards/sr-related-page-card.html">
+<link rel="import" href="../header-options/sr-related-pages-header-options.html">
+<link rel="import" href="../dialogs/sr-page-search-dialog.html">
+<link rel="import" href="../../sr-main-app-drawer-content.html">
+<link rel="import" href="../../../tools/menu-back-button.html">
+
+<dom-module id="sr-related-pages-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        --app-primary-color: #373737;
+        display: block;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      }
+    </style>
+    <app-drawer-layout fullbleed narrow="{{narrow}}">
+      <app-drawer
+          id="drawer"
+          slot="drawer"
+          swipe-open="[[narrow]]">
+        <sr-main-app-drawer-content></sr-main-app-drawer-content>
+      </app-drawer>
+      <app-header-layout has-scrolling-region>
+        <app-header slot="header" condenses reveals effects="waterfall">
+          <app-toolbar>
+            <menu-back-button
+                show-back-button="[[showBackButton]]"
+                disabled="[[disableMenuConfirmation]]"></menu-back-button>
+            <div main-title>[[menuTitle]]</div>
+            <sr-related-pages-header-options
+                related-pages-type="[[relatedPagesType]]"
+                disabled="[[disableMenuConfirmation]]"
+                show-page-confirmation="[[showPageConfirmation]]"></sr-related-pages-header-options>
+          </app-toolbar>
+        </app-header>
+        <template is="dom-repeat" items="{{relatedPages}}">
+          <sr-related-page-card
+              related-pages-type="[[relatedPagesType]]"
+              context-item="[[item]]"
+              context-index="[[index]]"></sr-related-page-card>
+        </template>
+        <template is="dom-if" if="{{!relatedPages}}">
+          <!-- normally impossible to reach, but possible if all related pages were deleted from the related-pages-view -->
+          <sr-related-page-card
+              related-pages-type="[[relatedPagesType]]"></sr-related-page-card>
+        </template>
+      </app-header-layout>
+    </app-drawer-layout>
+    <sr-page-search-dialog
+        id="pageSearchDialog"></sr-page-search-dialog>
+  </template>
+  <script>
+    class SrRelatedPagesView extends Polymer.Element {
+      static get is() { return 'sr-related-pages-view'; }
+
+      static get properties() {
+        return {
+          menuTitle: {
+            type: String,
+            value: 'Related Pages'
+          },
+          showPageConfirmation: {
+            type: Boolean,
+            value: false
+          },
+          disableMenuConfirmation: {
+            type: Boolean,
+            value: false
+          },
+          showBackButton: {
+            type: Boolean,
+            value: true,
+            notify: true
+          },
+          relatedPagesType: {
+            type: String,
+            value: null
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_pageIdChanged(page.id)',
+          '_relatedPagesTypeChanged(relatedPagesType)',
+        ];
+      }
+
+      _pageIdChanged(pageId) {
+        this._updateRelatedPagesType();
+      }
+
+      _relatedPagesTypeChanged(relatedPagesType) {
+        this.set('relatedPages', this._getRelatedPages(relatedPagesType));
+        this.set('menuTitle', this._getRelatedPageMenuTitle(relatedPagesType));
+      }
+
+      ready() {
+        super.ready();
+        this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
+        this.addEventListener('trigger-add-related-page', e => this._triggerAddRelatedPageChangeListener(e));
+        this.addEventListener('trigger-reorder-related-pages', e => this._triggerReorderRelatedPagesChangeListener(e));
+        this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
+        this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
+      }
+
+      _toggleDrawerChangeListener(event) {
+        this.$.drawer.toggle();
+      }
+
+      _triggerAddRelatedPageChangeListener(event) {
+
+      }
+
+      _triggerReorderRelatedPagesChangeListener(event) {
+        
+      }
+
+      _triggerPageConfirmationChangeListener(event) {
+        
+      }
+
+      _triggerSearchChangeListener(event) {
+        this.$.pageSearchDialog.toggle();
+      }
+
+      _updateRelatedPagesType() {
+        var pathParts = window.location.href.split('/');
+        var i;
+        for (i = pathParts.length - 1; i >= 0; i--) {
+          if (pathParts[i] == 'related-pages') {
+            // .../related-pages/{pageType}
+            this.set('relatedPagesType', pathParts[i + 1]);
+            return;
+          }
+        }
+      }
+
+      _getRelatedPages(relatedPagesType) {
+        var relatedPages = null;
+        if (!relatedPagesType || !this.page || !this.page.pages) {
+          return null;
+        }
+        this.page.pages.forEach(function(page) {
+          if (page.type == relatedPagesType) {
+            relatedPages = page;
+          }
+        });
+        return relatedPages.properties.list || null;
+      }
+
+      _getRelatedPageMenuTitle(relatedPagesType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPagesType);
+        if (!relatedPageMap) {
+          return 'Related Pages';
+        }
+        return 'Related ' + this._capitalizeFirstLetter(relatedPageMap.plural);
+      }
+
+      _capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      _getRelatedPageMap(pageType) {
+        var map = {
+          'AS': {
+            plural: 'associations',
+            singular: 'association'
+          },
+          'CA': {
+            plural: 'campaigns',
+            singular: 'campaign'
+          },
+          'CH': {
+            plural: 'characters',
+            singular: 'character'
+          },
+          'DI': {
+            plural: 'districts',
+            singular: 'district'
+          },
+          'EA': {
+            plural: 'eras',
+            singular: 'era'
+          },
+          'EV': {
+            plural: 'events',
+            singular: 'event'
+          },
+          'GR': {
+            plural: 'groups',
+            singular: 'group'
+          },
+          'HI': {
+            plural: 'histories',
+            singular: 'history'
+          },
+          'IT': {
+            plural: 'items',
+            singular: 'item'
+          },
+          'LM': {
+            plural: 'landmarks',
+            singular: 'landmark'
+          },
+          'LR': {
+            plural: 'lores',
+            singular: 'lore'
+          },
+          'PL': {
+            plural: 'places',
+            singular: 'place'
+          },
+          'QU': {
+            plural: 'quests',
+            singular: 'quest'
+          },
+          'RA': {
+            plural: 'races',
+            singular: 'race'
+          },
+          'RG': {
+            plural: 'regions',
+            singular: 'region'
+          },
+          'RP': {
+            plural: 'reports',
+            singular: 'report'
+          },
+          'SE': {
+            plural: 'sections',
+            singular: 'section'
+          },
+          'ST': {
+            plural: 'sets',
+            singular: 'set'
+          },
+          'SP': {
+            plural: 'species',
+            singular: 'species'
+          },
+          'SA': {
+            plural: 'story arcs',
+            singular: 'story arc'
+          },
+          'TX': {
+            plural: 'taxons',
+            singular: 'taxon'
+          },
+          'WD': {
+            plural: 'worlds',
+            singular: 'world'
+          }
+        }
+        if (!(pageType in map)) {
+          return null;
+        }
+        return map[pageType];
+      }
+    }
+
+    window.customElements.define(SrRelatedPagesView.is, SrRelatedPagesView);
+  </script>
+</dom-module>

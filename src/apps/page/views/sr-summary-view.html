@@ -1,5 +1,8 @@
 <link rel="import" href="../cards/sr-summary-card.html">
 <link rel="import" href="../cards/sr-related-pages-card.html">
+<link rel="import" href="../header-options/sr-summary-header-options.html">
+<link rel="import" href="../dialogs/sr-page-search-dialog.html">
+<link rel="import" href="../dialogs/sr-delete-page-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
 <link rel="import" href="../../../tools/menu-back-button.html">
 
@@ -34,37 +37,9 @@
                 show-back-button="[[showBackButton]]"
                 disabled="[[disableMenuConfirmation]]"></menu-back-button>
             <div main-title>[[menuTitle]]</div>
-            <template is="dom-if" if="[[showMenuConfirmation]]">
-              <paper-button
-                  class="btn-primary confirm-btn"
-                  on-tap="triggerSave"
-                  disabled="[[disableMenuConfirmation]]"
-                  raised>Save</paper-button>
-            </template>
-            <template is="dom-if" if="[[!showMenuConfirmation]]">
-              <paper-icon-button
-                  icon="sr-icons:search"
-                  on-tap="triggerSearchDialog"></paper-icon-button>
-              <paper-menu-button dynamic-align="true">
-                <paper-icon-button
-                    icon="sr-icons:more-vert"
-                    slot="dropdown-trigger"></paper-icon-button>
-                <paper-listbox slot="dropdown-content">
-                  <paper-icon-item on-tap="triggerAddPage">
-                    <iron-icon
-                      icon="sr-icons:page-add"
-                      slot="item-icon"></iron-icon>
-                    Add a Page
-                  </paper-icon-item>
-                  <paper-icon-item on-tap="triggerDeletePage">
-                    <iron-icon
-                        icon="sr-icons:delete"
-                        slot="item-icon"></iron-icon>
-                    Delete Page
-                  </paper-icon-item>
-                </paper-listbox>
-              </paper-menu-button>
-            </template>
+            <sr-summary-header-options
+                disabled="[[disableMenuConfirmation]]"
+                show-page-confirmation="[[showPageConfirmation]]"></sr-summary-header-options>
           </app-toolbar>
         </app-header>
         <sr-summary-card
@@ -73,6 +48,10 @@
             page="[[page]]"></sr-related-pages-card>
       </app-header-layout>
     </app-drawer-layout>
+    <sr-page-search-dialog
+        id="pageSearchDialog"></sr-page-search-dialog>
+    <sr-delete-page-dialog
+        id="deletePageDialog"></sr-delete-page-dialog>
   </template>
   <script>
     class SrSummaryView extends Polymer.Element {
@@ -84,7 +63,7 @@
             type: String,
             value: 'Page Summary'
           },
-          showMenuConfirmation: {
+          showPageConfirmation: {
             type: Boolean,
             value: false
           },
@@ -103,30 +82,30 @@
       ready() {
         super.ready();
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
+        this.addEventListener('trigger-add-page', e => this._triggerAddPageChangeListener(e));
+        this.addEventListener('trigger-delete-page', e => this._triggerDeletePageChangeListener(e));
+        this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
+        this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
       }
 
       _toggleDrawerChangeListener(event) {
         this.$.drawer.toggle();
       }
 
-      triggerDeletePage(event) {
-        this._closeMenu(event);
+      _triggerAddPageChangeListener(event) {
+
       }
 
-      triggerAddPage(event) {
-        this._closeMenu(event);
+      _triggerDeletePageChangeListener(event) {
+        this.$.deletePageDialog.toggle();
       }
 
-      triggerSave() {
+      _triggerPageConfirmationChangeListener(event) {
         
       }
 
-      triggerSearchDialog() {
-        
-      }
-
-      _closeMenu(event) {
-        event.currentTarget.parentElement.parentElement.close();
+      _triggerSearchChangeListener(event) {
+        this.$.pageSearchDialog.toggle();
       }
     }
 

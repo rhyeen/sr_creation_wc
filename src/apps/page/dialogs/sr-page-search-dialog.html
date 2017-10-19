@@ -1,0 +1,35 @@
+<dom-module id="sr-page-search-dialog">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <paper-dialog id="internalPageSearchDialog" modal>
+      <h2>Search</h2>
+      <paper-dialog-scrollable>
+        <p>Searching is not yet available.</p>
+        <p>Follow development on the <a href="https://github.com/rhyeen/sr_creation/projects/10" target="_blank">Github Search Bar Project Page</a>.</p>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus>Close</paper-button>
+        <!-- <paper-button dialog-dismiss>Cancel</paper-button> -->
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    class SrPageSearchDialog extends Polymer.Element {
+      static get is() { return 'sr-page-search-dialog'; }
+      
+      static get properties() {
+        return {
+          
+        };
+      }
+
+      toggle() {
+        this.$.internalPageSearchDialog.toggle();
+      }
+    }
+
+    window.customElements.define(SrPageSearchDialog.is, SrPageSearchDialog);
+  </script>
+</dom-module>

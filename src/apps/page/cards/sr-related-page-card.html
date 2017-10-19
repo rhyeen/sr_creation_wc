@@ -1,0 +1,210 @@
+<dom-module id="sr-related-page-card">
+  <template>
+    <style include="shared-styles">
+      .no-context {
+        margin-top: 80px;
+        color: var(--google-grey-700);
+      }
+      .no-context p {
+        text-align: center;
+      }
+
+      .no-context .title {
+        @apply --paper-font-title;
+      }
+      .no-context .tooltip {
+        @apply --paper-font-subhead;
+      }
+    </style>
+    <template is="dom-if" if="[[hasContextItem]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>{{contextItem.name}}</div>
+          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Relationship
+              </paper-icon-item>
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                Unlink Page
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.summary.text}}</iron-collapse>
+        </div>
+        <div class="card-actions">
+          <a class="route-link" href="{{getPageLinkUrl(contextItem)}}" tabindex="-1">
+            <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Go to Page</paper-button>
+          </a>
+        </div>
+      </paper-card>
+    </template>
+    <template is="dom-if" if="[[!hasContextItem]]">
+      <div class="no-context">
+        <p class="title">This page has no related [[relatedPagesTitle]].</p>
+        <p class="tooltip">Add one using the "+" button below.</p>
+      </div>
+    </template>
+    <paper-fab icon="sr-icons:add" title="Add Related Page"></paper-fab>
+  </template>
+  <script>
+    class SrRelatedPageCard extends Polymer.Element {
+      static get is() { return 'sr-related-page-card'; }
+
+      static get properties() {
+        return {
+          baseRoute: String,
+          hasContextItem: Boolean,
+          relatedPagesTitle: String,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_relatedPagesTypeChanged(relatedPagesType)',
+        ];
+      }
+
+      _relatedPagesTypeChanged(relatedPagesType) {
+        this.set('relatedPagesTitle', this._getRelatedPagesTitle(relatedPagesType));
+      }
+
+      constructor() {
+        super();
+        this.set('hasContextItem', !!this.contextItem);
+      }
+
+      getPageLinkUrl(contextItem) {
+        return window.location.origin + "/page/" + contextItem.id + "/summary";
+      }
+
+      toggleExpand() {
+        var iconButton = Polymer.dom(event).localTarget;
+        var summary = this.shadowRoot.querySelector("#" + this.getTargetSummary());
+        if (summary.opened) {
+          iconButton.icon = 'sr-icons:expand-more';
+        } else {
+          iconButton.icon = 'sr-icons:expand-less';
+        }
+        summary.toggle();
+      }
+
+      getTargetSummary() {
+        return 'relatedPagesSummary' + this.contextIndex;
+      }
+
+      _getRelatedPagesTitle(relatedPagesType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPagesType);
+        if (!relatedPageMap) {
+          return 'pages';
+        }
+        return relatedPageMap.plural;
+      }
+
+      _getRelatedPageMap(pageType) {
+        var map = {
+          'AS': {
+            plural: 'associations',
+            singular: 'association'
+          },
+          'CA': {
+            plural: 'campaigns',
+            singular: 'campaign'
+          },
+          'CH': {
+            plural: 'characters',
+            singular: 'character'
+          },
+          'DI': {
+            plural: 'districts',
+            singular: 'district'
+          },
+          'EA': {
+            plural: 'eras',
+            singular: 'era'
+          },
+          'EV': {
+            plural: 'events',
+            singular: 'event'
+          },
+          'GR': {
+            plural: 'groups',
+            singular: 'group'
+          },
+          'HI': {
+            plural: 'histories',
+            singular: 'history'
+          },
+          'IT': {
+            plural: 'items',
+            singular: 'item'
+          },
+          'LM': {
+            plural: 'landmarks',
+            singular: 'landmark'
+          },
+          'LR': {
+            plural: 'lores',
+            singular: 'lore'
+          },
+          'PL': {
+            plural: 'places',
+            singular: 'place'
+          },
+          'QU': {
+            plural: 'quests',
+            singular: 'quest'
+          },
+          'RA': {
+            plural: 'races',
+            singular: 'race'
+          },
+          'RG': {
+            plural: 'regions',
+            singular: 'region'
+          },
+          'RP': {
+            plural: 'reports',
+            singular: 'report'
+          },
+          'SE': {
+            plural: 'sections',
+            singular: 'section'
+          },
+          'ST': {
+            plural: 'sets',
+            singular: 'set'
+          },
+          'SP': {
+            plural: 'species',
+            singular: 'species'
+          },
+          'SA': {
+            plural: 'story arcs',
+            singular: 'story arc'
+          },
+          'TX': {
+            plural: 'taxons',
+            singular: 'taxon'
+          },
+          'WD': {
+            plural: 'worlds',
+            singular: 'world'
+          }
+        }
+        if (!(pageType in map)) {
+          return null;
+        }
+        return map[pageType];
+      }
+    }
+
+    window.customElements.define(SrRelatedPageCard.is, SrRelatedPageCard);
+  </script>
+</dom-module>

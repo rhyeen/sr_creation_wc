@@ -1,0 +1,220 @@
+<dom-module id="sr-related-pages-header-options">
+  <template>
+    <style include="shared-styles">
+      .confirm-btn {
+        padding: 5px 15px;
+        min-width: auto;
+        text-transform: capitalize;
+      }
+    </style>
+    <template is="dom-if" if="[[showPageConfirmation]]">
+      <paper-button
+          class="btn-primary confirm-btn"
+          on-tap="triggerPageConfirmation"
+          disabled="[[disabled]]"
+          raised>[[pageConfirmationText]]</paper-button>
+    </template>
+    <template is="dom-if" if="[[!showPageConfirmation]]">
+      <paper-icon-button
+          icon="sr-icons:search"
+          on-tap="triggerSearch"
+          disabled="[[disabled]]"></paper-icon-button>
+      <paper-menu-button dynamic-align="true">
+        <paper-icon-button
+            icon="sr-icons:more-vert"
+            slot="dropdown-trigger"
+            disabled="[[disabled]]"></paper-icon-button>
+        <paper-listbox slot="dropdown-content">
+          <paper-icon-item on-tap="triggerAddRelatedPage">
+            <iron-icon
+              icon="sr-icons:page-add"
+              slot="item-icon"></iron-icon>
+            [[addRelatedPageTitle]]
+          </paper-icon-item>
+          <paper-icon-item on-tap="triggerReorderRelatedPages">
+            <iron-icon
+                icon="sr-icons:reorder"
+                slot="item-icon"></iron-icon>
+            [[reorderRelatedPagesTitle]]
+          </paper-icon-item>
+        </paper-listbox>
+      </paper-menu-button>
+    </template>
+  </template>
+  <script>
+    class SrRelatedPagesHeaderOptions extends Polymer.Element {
+      static get is() { return 'sr-related-pages-header-options'; }
+      
+      static get properties() {
+        return {
+          addRelatedPageTitle: String,
+          reorderRelatedPagesTitle: String,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_relatedPagesTypeChanged(relatedPagesType)',
+        ];
+      }
+
+      _relatedPagesTypeChanged(relatedPagesType) {
+        this.set('addRelatedPageTitle', this._getAddRelatedPageTitle(relatedPagesType));
+        this.set('reorderRelatedPagesTitle', this._getReorderRelatedPagesTitle(relatedPagesType));
+      }
+
+      triggerPageConfirmation() {
+        this.dispatchEvent(new CustomEvent('trigger-page-confirmation', {bubbles: true, composed: true}));
+      }
+
+      triggerSearch() {
+        this.dispatchEvent(new CustomEvent('trigger-search', {bubbles: true, composed: true}));
+      }
+
+      triggerAddRelatedPage(event) {
+        this._closeMenu(event);
+        this.dispatchEvent(new CustomEvent('trigger-add-related-page', {bubbles: true, composed: true}));
+      }
+
+      triggerReorderRelatedPages(event) {
+        this._closeMenu(event);
+        this.dispatchEvent(new CustomEvent('trigger-reorder-related-pages', {bubbles: true, composed: true}));
+      }
+
+      goBack() {
+        window.history.back();
+      }
+
+      _closeMenu(event) {
+        event.currentTarget.parentElement.parentElement.close();
+      }
+
+      _getAddRelatedPageTitle(relatedPagesType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPagesType);
+        if (!relatedPageMap) {
+          return 'Add a Related Page';
+        }
+        return 'Add a Related ' + this._capitalizeFirstLetter(relatedPageMap.singular);
+      }
+
+      _getReorderRelatedPagesTitle(relatedPagesType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPagesType);
+        if (!relatedPageMap) {
+          return 'Reorder Related Pages';
+        }
+        return 'Reorder Related ' + this._capitalizeFirstLetter(relatedPageMap.plural);
+      }
+
+      _getRelatedPageTypeTitle(relatedPagesType) {
+        var relatedPageMap = this._getRelatedPageMap(relatedPagesType);
+        if (!relatedPageMap) {
+          return 'Related Pages';
+        }
+        return 'Related ' + this._capitalizeFirstLetter(relatedPageMap.plural);
+      }
+
+      _capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      _getRelatedPageMap(pageType) {
+        var map = {
+          'AS': {
+            plural: 'associations',
+            singular: 'association'
+          },
+          'CA': {
+            plural: 'campaigns',
+            singular: 'campaign'
+          },
+          'CH': {
+            plural: 'characters',
+            singular: 'character'
+          },
+          'DI': {
+            plural: 'districts',
+            singular: 'district'
+          },
+          'EA': {
+            plural: 'eras',
+            singular: 'era'
+          },
+          'EV': {
+            plural: 'events',
+            singular: 'event'
+          },
+          'GR': {
+            plural: 'groups',
+            singular: 'group'
+          },
+          'HI': {
+            plural: 'histories',
+            singular: 'history'
+          },
+          'IT': {
+            plural: 'items',
+            singular: 'item'
+          },
+          'LM': {
+            plural: 'landmarks',
+            singular: 'landmark'
+          },
+          'LR': {
+            plural: 'lores',
+            singular: 'lore'
+          },
+          'PL': {
+            plural: 'places',
+            singular: 'place'
+          },
+          'QU': {
+            plural: 'quests',
+            singular: 'quest'
+          },
+          'RA': {
+            plural: 'races',
+            singular: 'race'
+          },
+          'RG': {
+            plural: 'regions',
+            singular: 'region'
+          },
+          'RP': {
+            plural: 'reports',
+            singular: 'report'
+          },
+          'SE': {
+            plural: 'sections',
+            singular: 'section'
+          },
+          'ST': {
+            plural: 'sets',
+            singular: 'set'
+          },
+          'SP': {
+            plural: 'species',
+            singular: 'species'
+          },
+          'SA': {
+            plural: 'story arcs',
+            singular: 'story arc'
+          },
+          'TX': {
+            plural: 'taxons',
+            singular: 'taxon'
+          },
+          'WD': {
+            plural: 'worlds',
+            singular: 'world'
+          }
+        }
+        if (!(pageType in map)) {
+          return null;
+        }
+        return map[pageType];
+      }
+    }
+
+    window.customElements.define(SrRelatedPagesHeaderOptions.is, SrRelatedPagesHeaderOptions);
+  </script>
+</dom-module>

@@ -28,7 +28,7 @@
       <div class="card-action-list">
         <template is="dom-repeat" items="{{page.pages}}">
           <template is="dom-if" if="{{!reorderingPages}}">
-            <a class="route-link" href="{{route.prefix}}/related-pages/{{item.type}}" tabindex="-1">
+            <a class="route-link" href="{{baseRoute}}/related-pages/{{item.type}}" tabindex="-1">
               <paper-item>
                 <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
                 <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>

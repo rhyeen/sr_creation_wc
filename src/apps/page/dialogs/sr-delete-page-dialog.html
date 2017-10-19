@@ -1,0 +1,66 @@
+<dom-module id="sr-delete-page-dialog">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <paper-dialog id="internalDeletePageDialog" modal>
+      <h2>Delete Page</h2>
+      <paper-dialog-scrollable>
+        <p>Are you sure you want to delete this page?</p>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <a class="route-link" href="{{getDefaultPageView()}}" tabindex="-1">
+          <paper-button
+              class="btn-warn"
+              raised dialog-confirm autofocus
+              on-tap="deletePage">Delete</paper-button>
+        </a>
+      </div>
+    </paper-dialog>
+    <iron-ajax
+        id="deletePageAjax"
+        url="http://localhost:4000/user/page"
+        handle-as="json"
+        method="DELETE"
+        on-response="handleDeletePage"
+        debounce-duration="300"></iron-ajax>
+  </template>
+  <script>
+    class SrDeletePageDialog extends Polymer.Element {
+      static get is() { return 'sr-delete-page-dialog'; }
+      
+      static get properties() {
+        return {
+          
+        };
+      }
+
+      toggle() {
+        this.$.internalDeletePageDialog.toggle();
+      }
+
+      deletePage() {
+        this._deletePage();
+      }
+
+      getDefaultPageView() {
+        return window.location.origin + "/page";
+      }
+
+      handleDeletePage() {
+        // @TODO
+      }
+
+      _deletePage() {
+        var params = {
+          id: this.pageId
+        };
+        this.$.deletePageAjax.params = params;
+        this.$.deletePageAjax.generateRequest();
+      }
+    }
+
+    window.customElements.define(SrDeletePageDialog.is, SrDeletePageDialog);
+  </script>
+</dom-module>

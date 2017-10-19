@@ -1,0 +1,83 @@
+<dom-module id="sr-summary-header-options">
+  <template>
+    <style include="shared-styles">
+      .confirm-btn {
+        padding: 5px 15px;
+        min-width: auto;
+        text-transform: capitalize;
+      }
+    </style>
+    <template is="dom-if" if="[[showPageConfirmation]]">
+      <paper-button
+          class="btn-primary confirm-btn"
+          on-tap="triggerPageConfirmation"
+          disabled="[[disabled]]"
+          raised>[[pageConfirmationText]]</paper-button>
+    </template>
+    <template is="dom-if" if="[[!showPageConfirmation]]">
+      <paper-icon-button
+          icon="sr-icons:search"
+          on-tap="triggerSearch"
+          disabled="[[disabled]]"></paper-icon-button>
+      <paper-menu-button dynamic-align="true">
+        <paper-icon-button
+            icon="sr-icons:more-vert"
+            slot="dropdown-trigger"
+            disabled="[[disabled]]"></paper-icon-button>
+        <paper-listbox slot="dropdown-content">
+          <paper-icon-item on-tap="triggerAddPage">
+            <iron-icon
+              icon="sr-icons:page-add"
+              slot="item-icon"></iron-icon>
+            Add a Page
+          </paper-icon-item>
+          <paper-icon-item on-tap="triggerDeletePage">
+            <iron-icon
+                icon="sr-icons:delete"
+                slot="item-icon"></iron-icon>
+            Delete Page
+          </paper-icon-item>
+        </paper-listbox>
+      </paper-menu-button>
+    </template>
+  </template>
+  <script>
+    class SrSummaryHeaderOptions extends Polymer.Element {
+      static get is() { return 'sr-summary-header-options'; }
+      
+      static get properties() {
+        return {
+          
+        };
+      }
+
+      triggerPageConfirmation() {
+        this.dispatchEvent(new CustomEvent('trigger-page-confirmation', {bubbles: true, composed: true}));
+      }
+
+      triggerSearch() {
+        this.dispatchEvent(new CustomEvent('trigger-search', {bubbles: true, composed: true}));
+      }
+
+      triggerAddPage(event) {
+        this._closeMenu(event);
+        this.dispatchEvent(new CustomEvent('trigger-add-page', {bubbles: true, composed: true}));
+      }
+
+      triggerDeletePage(event) {
+        this._closeMenu(event);
+        this.dispatchEvent(new CustomEvent('trigger-delete-page', {bubbles: true, composed: true}));
+      }
+
+      goBack() {
+        window.history.back();
+      }
+
+      _closeMenu(event) {
+        event.currentTarget.parentElement.parentElement.close();
+      }
+    }
+
+    window.customElements.define(SrSummaryHeaderOptions.is, SrSummaryHeaderOptions);
+  </script>
+</dom-module>
