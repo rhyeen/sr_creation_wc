@@ -1,0 +1,64 @@
+<dom-module id="sr-main-app-drawer-content">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <app-toolbar>
+      <div main-title>Main Menu</div>
+      <paper-icon-button
+          icon="sr-icons:close"
+          on-tap="toggleDrawer"></paper-icon-button>
+    </app-toolbar>
+    <a class="route-link" href="[[baseRoute]]/page" tabindex="-1">
+      <paper-icon-item>
+        <iron-icon icon="sr-icons:description" slot="item-icon"></iron-icon>
+        Pages
+      </paper-icon-item>
+    </a>
+    <a class="route-link" href="[[baseRoute]]/bookmark" tabindex="-1">
+      <paper-icon-item>
+        <iron-icon icon="sr-icons:bookmark" slot="item-icon"></iron-icon>
+        Bookmarks
+      </paper-icon-item>
+    </a>
+    <a class="route-link" href="[[baseRoute]]/account" tabindex="-1">
+      <paper-icon-item>
+        <iron-icon icon="sr-icons:account-circle" slot="item-icon"></iron-icon>
+        Account
+      </paper-icon-item>
+    </a>
+    <a class="route-link" href="[[baseRoute]]/settings" tabindex="-1">
+      <paper-icon-item>
+        <iron-icon icon="sr-icons:settings" slot="item-icon"></iron-icon>
+        Settings
+      </paper-icon-item>
+    </a>
+  </template>
+
+  <script>
+    class SrMainAppDrawerContent extends Polymer.Element {
+      static get is() { return 'sr-main-app-drawer-content'; }
+
+      static get properties() {
+        return {
+          baseRoute: String
+        };
+      }
+
+      constructor() {
+        super();
+        this.set('baseRoute', this._getBaseRoute())
+      }
+
+      _getBaseRoute() {
+        return window.location.origin;
+      }
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggle-drawer', {bubbles: true, composed: true}));
+      }
+    }
+
+    window.customElements.define(SrMainAppDrawerContent.is, SrMainAppDrawerContent);
+  </script>
+</dom-module>

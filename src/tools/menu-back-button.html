@@ -1,0 +1,40 @@
+<dom-module id="menu-back-button">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <template is="dom-if" if="[[showBackButton]]">
+      <paper-icon-button
+          icon="sr-icons:arrow-back"
+          on-tap="goBack"
+          disabled="[[disabled]]"></paper-icon-button>
+    </template>
+    <template is="dom-if" if="[[!showBackButton]]">
+      <paper-icon-button
+          icon="sr-icons:menu"
+          disabled="[[disabled]]"
+          on-tap="toggleDrawer"></paper-icon-button>
+    </template>
+  </template>
+  <script>
+    class MenuBackButton extends Polymer.Element {
+      static get is() { return 'menu-back-button'; }
+
+      static get properties() {
+        return {
+          
+        };
+      }
+
+      toggleDrawer() {
+        this.dispatchEvent(new CustomEvent('toggle-drawer', {bubbles: true, composed: true}));
+      }
+
+      goBack() {
+        window.history.back();
+      }
+    }
+
+    window.customElements.define(MenuBackButton.is, MenuBackButton);
+  </script>
+</dom-module>

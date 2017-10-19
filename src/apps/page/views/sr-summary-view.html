@@ -1,0 +1,135 @@
+<link rel="import" href="../cards/sr-summary-card.html">
+<link rel="import" href="../cards/sr-related-pages-card.html">
+<link rel="import" href="../../sr-main-app-drawer-content.html">
+<link rel="import" href="../../../tools/menu-back-button.html">
+
+<dom-module id="sr-summary-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        --app-primary-color: #373737;
+        display: block;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      }
+    </style>
+    <app-drawer-layout fullbleed narrow="{{narrow}}">
+      <app-drawer
+          id="drawer"
+          slot="drawer"
+          swipe-open="[[narrow]]">
+        <sr-main-app-drawer-content></sr-main-app-drawer-content>
+      </app-drawer>
+      <app-header-layout has-scrolling-region>
+        <app-header slot="header" condenses reveals effects="waterfall">
+          <app-toolbar>
+            <menu-back-button
+                show-back-button="[[showBackButton]]"
+                disabled="[[disableMenuConfirmation]]"></menu-back-button>
+            <div main-title>[[menuTitle]]</div>
+            <template is="dom-if" if="[[showMenuConfirmation]]">
+              <paper-button
+                  class="btn-primary confirm-btn"
+                  on-tap="triggerSave"
+                  disabled="[[disableMenuConfirmation]]"
+                  raised>Save</paper-button>
+            </template>
+            <template is="dom-if" if="[[!showMenuConfirmation]]">
+              <paper-icon-button
+                  icon="sr-icons:search"
+                  on-tap="triggerSearchDialog"></paper-icon-button>
+              <paper-menu-button dynamic-align="true">
+                <paper-icon-button
+                    icon="sr-icons:more-vert"
+                    slot="dropdown-trigger"></paper-icon-button>
+                <paper-listbox slot="dropdown-content">
+                  <paper-icon-item on-tap="triggerAddPage">
+                    <iron-icon
+                      icon="sr-icons:page-add"
+                      slot="item-icon"></iron-icon>
+                    Add a Page
+                  </paper-icon-item>
+                  <paper-icon-item on-tap="triggerDeletePage">
+                    <iron-icon
+                        icon="sr-icons:delete"
+                        slot="item-icon"></iron-icon>
+                    Delete Page
+                  </paper-icon-item>
+                </paper-listbox>
+              </paper-menu-button>
+            </template>
+          </app-toolbar>
+        </app-header>
+        <sr-summary-card
+            page="[[page]]"></sr-summary-card>
+        <sr-related-pages-card
+            page="[[page]]"></sr-related-pages-card>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+  <script>
+    class SrSummaryView extends Polymer.Element {
+      static get is() { return 'sr-summary-view'; }
+
+      static get properties() {
+        return {
+          menuTitle: {
+            type: String,
+            value: 'Page Summary'
+          },
+          showMenuConfirmation: {
+            type: Boolean,
+            value: false
+          },
+          disableMenuConfirmation: {
+            type: Boolean,
+            value: false
+          },
+          showBackButton: {
+            type: Boolean,
+            value: false,
+            notify: true
+          }
+        };
+      }
+
+      ready() {
+        super.ready();
+        this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
+      }
+
+      _toggleDrawerChangeListener(event) {
+        this.$.drawer.toggle();
+      }
+
+      triggerDeletePage(event) {
+        this._closeMenu(event);
+      }
+
+      triggerAddPage(event) {
+        this._closeMenu(event);
+      }
+
+      triggerSave() {
+        
+      }
+
+      triggerSearchDialog() {
+        
+      }
+
+      _closeMenu(event) {
+        event.currentTarget.parentElement.parentElement.close();
+      }
+    }
+
+    window.customElements.define(SrSummaryView.is, SrSummaryView);
+  </script>
+</dom-module>

@@ -1,0 +1,131 @@
+<link rel="lazy-import" href="views/sr-summary-view.html">
+<link rel="lazy-import" href="views/sr-details-view.html">
+<link rel="lazy-import" href="views/sr-image-view.html">
+<link rel="lazy-import" href="views/sr-related-pages-view.html">
+
+<dom-module id="sr-page-app">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <app-route
+        route="{{route}}"
+        pattern="/:pageId/:context"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <iron-pages
+        selected="[[routeData.context]]"
+        attr-for-selected="name"
+        fallback-selection="summary"
+        role="main">
+      <sr-summary-view
+          name="summary"
+          page="[[page]]"></sr-summary-view>
+      <sr-related-pages-view
+          name="related-pages"
+          page="[[page]]"></sr-related-pages-view>
+      <sr-details-view
+          name="details"
+          page="[[page]]"></sr-details-view>
+      <sr-images-view
+          name="images"
+          page="[[page]]"></sr-images-view>
+    </iron-pages>
+    <iron-ajax
+        id="getPageAjax"
+        url="http://localhost:4000/user/page"
+        handle-as="json"
+        on-response="handleGetPage"
+        debounce-duration="300"></iron-ajax>
+  </template>
+
+  <script>
+    class SrPageApp extends Polymer.Element {
+      static get is() { return 'sr-page-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: Object,
+            notify: true,
+            readOnly: false,
+          },
+          pageId: String,
+          getPageParams: {
+            type: Object,
+            value: {}
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChangedPageId(routeData.pageId)',
+          '_routeDataChangedContext(routeData.context)',
+          '_routePathChanged(route.path)',
+        ];
+      }
+
+      handleGetPage(event) {
+        this.setPage(event.detail.response);
+      }
+
+      setPage(page) {
+        this.page = page;
+        console.log(page);
+      }
+
+      _routePathChanged(path) {
+        if (!path && 'pageId' in this.routeData && this.routeData.pageId) {
+          this.set('routeData.pageId', null);
+        }
+      }
+
+      _routeDataChangedPageId(pageId) {
+        if (pageId != this.pageId) {
+          this.pageId = pageId;
+          this._getPage(pageId);
+        }
+      }
+
+      _routeDataChangedContext(context) {
+        var resolveUrlMap = {
+          summary: 'views/sr-summary-view.html',
+          'related-pages': 'views/sr-related-pages-view.html',
+          details: 'views/sr-details-view.html',
+          images: 'views/sr-images-view.html',
+        };
+        Polymer.importHref(
+            this.resolveUrl(resolveUrlMap[this._resolvePage(context)]),
+            null,
+            null,
+            true);
+      }
+
+      _resolvePage(context) {
+        var validPages = [
+          'summary',
+          'related-pages',
+          'details',
+          'images'
+        ];
+        if (!context || validPages.indexOf(context) === -1) {
+          this.set('routeData.context', 'summary');
+          return 'summary';
+        }
+        return context;
+      }
+
+      _getPage(pageId) {
+        var params = {};
+        if (pageId) {
+          params.id = pageId; // CA_2MLJEe0YuQrLt
+        }
+        this.$.getPageAjax.params = params;
+        this.$.getPageAjax.generateRequest();
+      }
+    }
+
+    window.customElements.define(SrPageApp.is, SrPageApp);
+  </script>
+</dom-module>

@@ -1,0 +1,83 @@
+<link rel="lazy-import" href="account/sr-account-app.html">
+<link rel="lazy-import" href="page/sr-page-app.html">
+<link rel="lazy-import" href="page/sr-edit-page-content-view.html">
+<link rel="lazy-import" href="settings/sr-settings-app.html">
+<link rel="lazy-import" href="bookmark/sr-bookmark-app.html">
+
+<dom-module id="sr-main-app">
+  <template>
+    <style include="shared-styles">
+      
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/:viewWindow"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <iron-pages
+        selected="[[routeData.viewWindow]]"
+        attr-for-selected="name"
+        fallback-selection="page"
+        role="main">
+      <sr-page-app
+          name="page"
+          route="{{subRoute}}"></sr-page-app>
+      <sr-bookmark-app
+          name="bookmark"></sr-bookmark-app>
+      <sr-account-app
+          name="account"></sr-account-app>
+      <sr-settings-app
+          name="settings"></sr-settings-app>
+    </iron-pages>
+  </template>
+
+  <script>
+    class SrMainApp extends Polymer.Element {
+      static get is() { return 'sr-main-app'; }
+
+      static get properties() {
+        return {
+          
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.viewWindow)',
+        ];
+      }
+
+      _routeDataChanged(viewWindow) {
+        var resolveUrlMap = {
+          page: 'page/sr-page-app.html',
+          bookmark: 'bookmark/sr-bookmark-app.html',
+          account: 'account/sr-account-app.html',
+          settings: 'settings/sr-settings-app.html',
+        };
+        Polymer.importHref(
+            this.resolveUrl(resolveUrlMap[this._resolvePage(viewWindow)]),
+            null,
+            null,
+            true);
+      }
+
+      _resolvePage(viewWindow) {
+        var validPages = [
+          'page',
+          'bookmark',
+          'account',
+          'settings'
+        ];
+        if (!viewWindow || validPages.indexOf(viewWindow) === -1) {
+          this.set('routeData.viewWindow', 'page');
+          return 'page';
+        }
+        return viewWindow;
+      }
+    }
+
+    window.customElements.define(SrMainApp.is, SrMainApp);
+  </script>
+</dom-module>
