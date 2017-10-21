@@ -1,4 +1,4 @@
-<dom-module id="sr-add-page-view">
+<dom-module id="sr-add-page-card">
   <template>
     <style include="shared-styles">
       .top-padded {
@@ -29,72 +29,65 @@
         margin: 20px;
       }
     </style>
-    <app-route
-        route="{{route}}"
-        pattern="/:context"
-        data="{{routeData}}"
-        tail="{{subRoute}}"></app-route>
-    <template is="dom-if" if="[[showView]]">
-      <paper-radio-group selected="{{creationAction}}">
-        <paper-radio-button name="link">Bind to an existing page</paper-radio-button>
-        <paper-radio-button name="new">Create a new page</paper-radio-button>
-      </paper-radio-group>
-      <template is="dom-if" if="[[shouldCreateNewPage(creationAction)]]">
-        <paper-card>
-          <app-toolbar>
-            <div main-title>Create a new page</div>
-          </app-toolbar>
-          <div class="card-content">
-            <paper-dropdown-menu label="Page Type">
-              <paper-listbox slot="dropdown-content" class="dropdown-content">
-                <template is="dom-repeat" items="{{pageTypes}}">
-                  <paper-item>{{item}}</paper-item>
-                </template>
-              </paper-listbox>
-            </paper-dropdown-menu>
-            <paper-input
-                label="New Page Title"
-                required></paper-input>
-            <paper-textarea label="Summary"></paper-textarea>
-          </div>
-          <div class="card-actions">
-            <paper-toggle-button
-                class="top-padded"
-                checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
+    <paper-radio-group selected="{{creationAction}}">
+      <paper-radio-button name="link">Bind to an existing page</paper-radio-button>
+      <paper-radio-button name="new">Create a new page</paper-radio-button>
+    </paper-radio-group>
+    <template is="dom-if" if="[[shouldCreateNewPage(creationAction)]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>Create a new page</div>
+        </app-toolbar>
+        <div class="card-content">
+          <paper-dropdown-menu label="Page Type">
+            <paper-listbox slot="dropdown-content" class="dropdown-content">
+              <template is="dom-repeat" items="{{pageTypes}}">
+                <paper-item>{{item}}</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-input
+              label="New Page Title"
+              required></paper-input>
+          <paper-textarea label="Summary"></paper-textarea>
+        </div>
+        <div class="card-actions">
+          <paper-toggle-button
+              class="top-padded"
+              checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
+          <paper-autocomplete
+              label="Linked Page"
+              source="[[linkedPageSources]]"
+              required
+              text="{{linkedPageText}}"
+              value="{{linkedPageValue}}"
+              disabled="[[linkToPreviousPage]]"
+              show-results-on-focus></paper-autocomplete>
+        </div>
+      </paper-card>
+    </template>
+    <template is="dom-if" if="[[!shouldCreateNewPage(creationAction)]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>Bind to an existing page</div>
+        </app-toolbar>
+        <div class="card-content">
+          <template is="dom-if" if="[[!pageSearchResult.text]]">
             <paper-autocomplete
-                label="Linked Page"
-                source="[[linkedPageSources]]"
+                id="pageSearchInput"
+                label="Search for Page"
                 required
-                text="{{linkedPageText}}"
-                value="{{linkedPageValue}}"
-                disabled="[[linkToPreviousPage]]"
+                remote-source
                 show-results-on-focus></paper-autocomplete>
-          </div>
-        </paper-card>
-      </template>
-      <template is="dom-if" if="[[!shouldCreateNewPage(creationAction)]]">
-        <paper-card>
-          <app-toolbar>
-            <div main-title>Bind to an existing page</div>
-          </app-toolbar>
-          <div class="card-content">
-            <template is="dom-if" if="[[!pageSearchResult.text]]">
-              <paper-autocomplete
-                  id="pageSearchInput"
-                  label="Search for Page"
-                  required
-                  remote-source
-                  show-results-on-focus></paper-autocomplete>
-            </template>
-            <template is="dom-if" if="[[pageSearchResult.text]]">
-              <div class="selected-item">
-                <span>{{pageSearchResult.text}}</span>
-                <paper-icon-button icon="sr-icons:close" on-tap="clearPageSearchResult"></paper-icon-button>
-              </div>
-            </template>
-          </div>
-        </paper-card>
-      </template>
+          </template>
+          <template is="dom-if" if="[[pageSearchResult.text]]">
+            <div class="selected-item">
+              <span>{{pageSearchResult.text}}</span>
+              <paper-icon-button icon="sr-icons:close" on-tap="clearPageSearchResult"></paper-icon-button>
+            </div>
+          </template>
+        </div>
+      </paper-card>
     </template>
     <iron-ajax
         id="getSearchPageResultsAjax"
@@ -105,8 +98,8 @@
   </template>
 
   <script>
-    class SrAddPageView extends Polymer.Element {
-      static get is() { return 'sr-add-page-view'; }
+    class SrAddPageCard extends Polymer.Element {
+      static get is() { return 'sr-add-page-card'; }
 
       static get properties() {
         return {
@@ -241,6 +234,11 @@
       }
 
       _setLinkedPageDefaults() {
+        if (!this.page) {
+          console.log('@DEBUG: page not found. Remove check after debugging.');
+          return;
+        }
+        console.log('@DEBUG: page found. Remove check after debugging.');
         this.set('linkedPageText', this.page.name);
         this.set('linkedPageValue', this.page.id);
       }
@@ -273,6 +271,6 @@
       }
     }
 
-    window.customElements.define(SrAddPageView.is, SrAddPageView);
+    window.customElements.define(SrAddPageCard.is, SrAddPageCard);
   </script>
 </dom-module>

@@ -1,4 +1,5 @@
 <link rel="import" href="../cards/sr-summary-card.html">
+<link rel="import" href="../cards/sr-add-page-card.html">
 <link rel="import" href="../cards/sr-related-pages-card.html">
 <link rel="import" href="../header-options/sr-summary-header-options.html">
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
@@ -29,10 +30,16 @@
                 show-page-confirmation="[[showPageConfirmation]]"></sr-summary-header-options>
           </app-toolbar>
         </app-header>
-        <sr-summary-card
-            page="[[page]]"></sr-summary-card>
-        <sr-related-pages-card
-            page="[[page]]"></sr-related-pages-card>
+        <template is="dom-if" if="[[!showAddPage]]">
+          <sr-summary-card
+              page="[[page]]"></sr-summary-card>
+          <sr-related-pages-card
+              page="[[page]]"></sr-related-pages-card>
+        </template>
+        <template is="dom-if" if="[[showAddPage]]">
+          <sr-add-page-card
+              page="[[page]]"></sr-add-page-card>
+        </template>
       </app-header-layout>
     </app-drawer-layout>
     <sr-page-search-dialog
@@ -62,6 +69,10 @@
             type: Boolean,
             value: false,
             notify: true
+          },
+          showAddPage: {
+            type: Boolean,
+            value: true
           }
         };
       }
@@ -80,7 +91,10 @@
       }
 
       _triggerAddPageChangeListener(event) {
-
+        this.set('showAddPage', true);
+        this.set('showBackButton', true);
+        this.set('showPageConfirmation', true);
+        this.set('menuTitle', 'Add a Page');
       }
 
       _triggerDeletePageChangeListener(event) {
