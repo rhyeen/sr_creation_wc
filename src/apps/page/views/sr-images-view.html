@@ -1,11 +1,9 @@
-<link rel="import" href="../cards/sr-summary-card.html">
-<link rel="import" href="../cards/sr-related-pages-card.html">
-<link rel="import" href="../header-options/sr-summary-header-options.html">
+<link rel="import" href="../cards/sr-image-card.html">
+<link rel="import" href="../header-options/sr-images-header-options.html">
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
-<link rel="import" href="../dialogs/sr-delete-page-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
 
-<dom-module id="sr-summary-view">
+<dom-module id="sr-images-view">
   <template>
     <style include="shared-styles">
 
@@ -24,31 +22,33 @@
                 show-back-button="[[showBackButton]]"
                 disabled="[[disableMenuConfirmation]]"></menu-back-button>
             <div main-title>[[menuTitle]]</div>
-            <sr-summary-header-options
+            <sr-images-header-options
                 disabled="[[disableMenuConfirmation]]"
-                show-page-confirmation="[[showPageConfirmation]]"></sr-summary-header-options>
+                show-page-confirmation="[[showPageConfirmation]]"></sr-images-header-options>
           </app-toolbar>
         </app-header>
-        <sr-summary-card
-            page="[[page]]"></sr-summary-card>
-        <sr-related-pages-card
-            page="[[page]]"></sr-related-pages-card>
+        <template is="dom-repeat" items="{{page.images.list}}">
+          <sr-image-card
+              context-item="[[item]]"
+              context-index="[[index]]"></sr-image-card>
+        </template>
+        <template is="dom-if" if="{{!hasImagesList}}">
+          <sr-image-card></sr-image-card>
+        </template>
       </app-header-layout>
     </app-drawer-layout>
     <sr-page-search-dialog
         id="pageSearchDialog"></sr-page-search-dialog>
-    <sr-delete-page-dialog
-        id="deletePageDialog"></sr-delete-page-dialog>
   </template>
   <script>
-    class SrSummaryView extends Polymer.Element {
-      static get is() { return 'sr-summary-view'; }
+    class SrImagesView extends Polymer.Element {
+      static get is() { return 'sr-images-view'; }
 
       static get properties() {
         return {
           menuTitle: {
             type: String,
-            value: 'Page Summary'
+            value: 'Images'
           },
           showPageConfirmation: {
             type: Boolean,
@@ -60,17 +60,35 @@
           },
           showBackButton: {
             type: Boolean,
-            value: false,
+            value: true,
             notify: true
-          }
+          },
+          hasImagesList: Boolean
         };
+      }
+
+      static get observers() {
+        return [
+          '_pageIdChanged(page.id)',
+        ];
+      }
+
+      _pageIdChanged(pageId) {
+        this.set('hasImagesList', this._hasImageList());
+      }
+
+      _hasImageList() {
+        if (!this.page.images || !this.page.images.list) {
+          return false;
+        }
+        return !!this.page.images.list.length;
       }
 
       ready() {
         super.ready();
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
-        this.addEventListener('trigger-add-page', e => this._triggerAddPageChangeListener(e));
-        this.addEventListener('trigger-delete-page', e => this._triggerDeletePageChangeListener(e));
+        this.addEventListener('trigger-add-image', e => this._triggerAddImageChangeListener(e));
+        this.addEventListener('trigger-reorder-images', e => this._triggerReorderImagesChangeListener(e));
         this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
         this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
       }
@@ -79,12 +97,12 @@
         this.$.drawer.toggle();
       }
 
-      _triggerAddPageChangeListener(event) {
+      _triggerAddImageChangeListener(event) {
 
       }
 
-      _triggerDeletePageChangeListener(event) {
-        this.$.deletePageDialog.toggle();
+      _triggerReorderImagesChangeListener(event) {
+        
       }
 
       _triggerPageConfirmationChangeListener(event) {
@@ -96,6 +114,6 @@
       }
     }
 
-    window.customElements.define(SrSummaryView.is, SrSummaryView);
+    window.customElements.define(SrImagesView.is, SrImagesView);
   </script>
 </dom-module>

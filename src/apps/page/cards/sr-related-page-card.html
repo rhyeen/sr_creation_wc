@@ -1,26 +1,15 @@
 <dom-module id="sr-related-page-card">
   <template>
     <style include="shared-styles">
-      .no-context {
-        margin-top: 80px;
-        color: var(--google-grey-700);
-      }
-      .no-context p {
-        text-align: center;
-      }
-
-      .no-context .title {
-        @apply --paper-font-title;
-      }
-      .no-context .tooltip {
-        @apply --paper-font-subhead;
-      }
     </style>
     <template is="dom-if" if="[[hasContextItem]]">
       <paper-card>
         <app-toolbar>
           <div main-title>{{contextItem.name}}</div>
-          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+          <paper-icon-button
+              icon="sr-icons:expand-more"
+              on-tap="toggleExpand"
+              hidden="[[!contextItem.summary.text]]"></paper-icon-button>
           <paper-menu-button dynamic-align="true">
             <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
             <paper-listbox slot="dropdown-content">
@@ -60,7 +49,10 @@
       static get properties() {
         return {
           baseRoute: String,
-          hasContextItem: Boolean,
+          hasContextItem: {
+            object: Boolean,
+            value: false
+          },
           relatedPagesTitle: String,
         };
       }
@@ -68,6 +60,7 @@
       static get observers() {
         return [
           '_relatedPagesTypeChanged(relatedPagesType)',
+          '_contextItemChanged(contextItem)',
         ];
       }
 
@@ -75,9 +68,8 @@
         this.set('relatedPagesTitle', this._getRelatedPagesTitle(relatedPagesType));
       }
 
-      constructor() {
-        super();
-        this.set('hasContextItem', !!this.contextItem);
+      _contextItemChanged(contextItem) {
+        this.set('hasContextItem', !!contextItem);
       }
 
       getPageLinkUrl(contextItem) {

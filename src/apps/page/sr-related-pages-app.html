@@ -1,0 +1,65 @@
+<link rel="import" href="views/sr-related-pages-view.html">
+
+<dom-module id="sr-related-pages-app">
+  <template>
+    <style include="shared-styles">
+
+    </style>
+    <app-route
+        route="{{route}}"
+        pattern="/:relatedPagesType"
+        data="{{routeData}}"
+        tail="{{subRoute}}"></app-route>
+    <sr-related-pages-view
+        class="view-container"
+        name="related-pages"
+        related-pages-type="[[routeData.relatedPagesType]]"
+        related-pages="[[relatedPages]]"
+        page="[[page]]"></sr-related-pages-view>
+  </template>
+
+  <script>
+    class SrRelatedPagesApp extends Polymer.Element {
+      static get is() { return 'sr-related-pages-app'; }
+
+      static get properties() {
+        return {
+          relatedPages: String,
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.relatedPagesType)',
+          '_pageIdChanged(page.id)',
+        ];
+      }
+
+      _routeDataChanged(relatedPagesType) {
+        this.set('relatedPages', this._getRelatedPages(relatedPagesType));
+      }
+
+      _pageIdChanged(pageId) {
+        this.set('relatedPages', this._getRelatedPages(this.routeData.relatedPagesType));
+      }
+
+      _getRelatedPages(relatedPagesType) {
+        var relatedPages = null;
+        if (!relatedPagesType || !this.page || !this.page.pages) {
+          return null;
+        }
+        this.page.pages.forEach(function(page) {
+          if (page.type == relatedPagesType) {
+            relatedPages = page;
+          }
+        });
+        if (!relatedPages || !relatedPages.properties) {
+          return null;
+        }
+        return relatedPages.properties.list;
+      }
+    }
+
+    window.customElements.define(SrRelatedPagesApp.is, SrRelatedPagesApp);
+  </script>
+</dom-module>

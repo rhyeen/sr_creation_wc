@@ -2,24 +2,11 @@
 <link rel="import" href="../header-options/sr-related-pages-header-options.html">
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
-<link rel="import" href="../../../tools/menu-back-button.html">
 
 <dom-module id="sr-related-pages-view">
   <template>
     <style include="shared-styles">
-      :host {
-        --app-primary-color: #373737;
-        display: block;
-      }
 
-      app-drawer-layout:not([narrow]) [drawer-toggle] {
-        display: none;
-      }
-
-      app-header {
-        color: #fff;
-        background-color: var(--app-primary-color);
-      }
     </style>
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <app-drawer
@@ -79,28 +66,23 @@
             type: Boolean,
             value: true,
             notify: true
-          },
-          relatedPagesType: {
-            type: String,
-            value: null
           }
         };
       }
 
       static get observers() {
         return [
-          '_pageIdChanged(page.id)',
           '_relatedPagesTypeChanged(relatedPagesType)',
+          '_pageIdChanged(page.id)',
         ];
       }
 
-      _pageIdChanged(pageId) {
-        this._updateRelatedPagesType();
+      _relatedPagesTypeChanged(relatedPagesType) {
+        this.set('menuTitle', this._getRelatedPageMenuTitle(relatedPagesType));
       }
 
-      _relatedPagesTypeChanged(relatedPagesType) {
-        this.set('relatedPages', this._getRelatedPages(relatedPagesType));
-        this.set('menuTitle', this._getRelatedPageMenuTitle(relatedPagesType));
+      _pageIdChanged(pageId) {
+        this.set('menuTitle', this._getRelatedPageMenuTitle(this.relatedPagesType));
       }
 
       ready() {
@@ -130,31 +112,6 @@
 
       _triggerSearchChangeListener(event) {
         this.$.pageSearchDialog.toggle();
-      }
-
-      _updateRelatedPagesType() {
-        var pathParts = window.location.href.split('/');
-        var i;
-        for (i = pathParts.length - 1; i >= 0; i--) {
-          if (pathParts[i] == 'related-pages') {
-            // .../related-pages/{pageType}
-            this.set('relatedPagesType', pathParts[i + 1]);
-            return;
-          }
-        }
-      }
-
-      _getRelatedPages(relatedPagesType) {
-        var relatedPages = null;
-        if (!relatedPagesType || !this.page || !this.page.pages) {
-          return null;
-        }
-        this.page.pages.forEach(function(page) {
-          if (page.type == relatedPagesType) {
-            relatedPages = page;
-          }
-        });
-        return relatedPages.properties.list || null;
       }
 
       _getRelatedPageMenuTitle(relatedPagesType) {

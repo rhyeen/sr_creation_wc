@@ -1,4 +1,4 @@
-<dom-module id="sr-summary-header-options">
+<dom-module id="sr-images-header-options">
   <template>
     <style include="shared-styles">
     </style>
@@ -20,29 +20,29 @@
             slot="dropdown-trigger"
             disabled="[[disabled]]"></paper-icon-button>
         <paper-listbox slot="dropdown-content">
-          <paper-icon-item on-tap="triggerAddPage">
+          <paper-icon-item on-tap="triggerAddImage">
             <iron-icon
-              icon="sr-icons:page-add"
+              icon="sr-icons:add-circle"
               slot="item-icon"></iron-icon>
-            Add a Page
+            Add an Image
           </paper-icon-item>
-          <paper-icon-item on-tap="triggerDeletePage">
+          <paper-icon-item on-tap="triggerReorderImages">
             <iron-icon
-                icon="sr-icons:delete"
+                icon="sr-icons:reorder"
                 slot="item-icon"></iron-icon>
-            Delete Page
+            Reorder Images
           </paper-icon-item>
         </paper-listbox>
       </paper-menu-button>
     </template>
   </template>
   <script>
-    class SrSummaryHeaderOptions extends Polymer.Element {
-      static get is() { return 'sr-summary-header-options'; }
+    class SrImagesHeaderOptions extends Polymer.Element {
+      static get is() { return 'sr-images-header-options'; }
       
       static get properties() {
         return {
-          
+
         };
       }
 
@@ -54,14 +54,14 @@
         this.dispatchEvent(new CustomEvent('trigger-search', {bubbles: true, composed: true}));
       }
 
-      triggerAddPage(event) {
+      triggerAddImage(event) {
         this._closeMenu(event);
-        this.dispatchEvent(new CustomEvent('trigger-add-page', {bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('trigger-add-image', {bubbles: true, composed: true}));
       }
 
-      triggerDeletePage(event) {
+      triggerReorderImages(event) {
         this._closeMenu(event);
-        this.dispatchEvent(new CustomEvent('trigger-delete-page', {bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('trigger-reorder-images', {bubbles: true, composed: true}));
       }
 
       goBack() {
@@ -73,6 +73,6 @@
       }
     }
 
-    window.customElements.define(SrSummaryHeaderOptions.is, SrSummaryHeaderOptions);
+    window.customElements.define(SrImagesHeaderOptions.is, SrImagesHeaderOptions);
   </script>
 </dom-module>

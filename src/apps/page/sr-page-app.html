@@ -1,7 +1,7 @@
 <link rel="lazy-import" href="views/sr-summary-view.html">
 <link rel="lazy-import" href="views/sr-details-view.html">
-<link rel="lazy-import" href="views/sr-image-view.html">
-<link rel="lazy-import" href="views/sr-related-pages-view.html">
+<link rel="lazy-import" href="views/sr-images-view.html">
+<link rel="lazy-import" href="sr-related-pages-app.html">
 
 <dom-module id="sr-page-app">
   <template>
@@ -19,16 +19,20 @@
         fallback-selection="summary"
         role="main">
       <sr-summary-view
+          class="view-container"
           name="summary"
           page="[[page]]"></sr-summary-view>
-      <sr-related-pages-view
+      <sr-related-pages-app
           name="related-pages"
-          page="[[page]]"></sr-related-pages-view>
+          page="[[page]]"
+          route="{{subRoute}}"></sr-related-pages-app>
       <sr-details-view
-          name="details"
+          class="view-container"
+          name="detail"
           page="[[page]]"></sr-details-view>
       <sr-images-view
-          name="images"
+          class="view-container"
+          name="image"
           page="[[page]]"></sr-images-view>
     </iron-pages>
     <iron-ajax
@@ -91,9 +95,9 @@
       _routeDataChangedContext(context) {
         var resolveUrlMap = {
           summary: 'views/sr-summary-view.html',
-          'related-pages': 'views/sr-related-pages-view.html',
-          details: 'views/sr-details-view.html',
-          images: 'views/sr-images-view.html',
+          'related-pages': 'sr-related-pages-app.html',
+          detail: 'views/sr-details-view.html',
+          image: 'views/sr-images-view.html',
         };
         Polymer.importHref(
             this.resolveUrl(resolveUrlMap[this._resolvePage(context)]),
@@ -106,8 +110,8 @@
         var validPages = [
           'summary',
           'related-pages',
-          'details',
-          'images'
+          'detail',
+          'image'
         ];
         if (!context || validPages.indexOf(context) === -1) {
           this.set('routeData.context', 'summary');

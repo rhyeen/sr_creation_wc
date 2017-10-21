@@ -1,0 +1,81 @@
+<dom-module id="sr-detail-card">
+  <template>
+    <style include="shared-styles">
+    </style>
+    <template is="dom-if" if="[[hasContextItem]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>{{contextItem.name}}</div>
+          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Detail
+              </paper-icon-item>
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                Delete Detail
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <iron-collapse id="[[getTargetSummary()]]" class="summary">
+            <rendered-markdown
+                partitions="{{contextItem.content.partitions}}"></rendered-markdown>
+          </iron-collapse>
+        </div>
+      </paper-card>
+    </template>
+    <template is="dom-if" if="[[!hasContextItem]]">
+      <div class="no-context">
+        <p class="title">This page has no details.</p>
+        <p class="tooltip">Add one using the "+" button below.</p>
+      </div>
+    </template>
+    <paper-fab icon="sr-icons:add" title="Add Detail"></paper-fab>
+  </template>
+  <script>
+    class SrDetailCard extends Polymer.Element {
+      static get is() { return 'sr-detail-card'; }
+
+      static get properties() {
+        return {
+          hasContextItem: {
+            object: Boolean,
+            value: false
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_contextItemChanged(contextItem)',
+        ];
+      }
+
+      _contextItemChanged(contextItem) {
+        this.set('hasContextItem', !!contextItem);
+      }
+
+      toggleExpand() {
+        var iconButton = Polymer.dom(event).localTarget;
+        var summary = this.shadowRoot.querySelector("#" + this.getTargetSummary());
+        if (summary.opened) {
+          iconButton.icon = 'sr-icons:expand-more';
+        } else {
+          iconButton.icon = 'sr-icons:expand-less';
+        }
+        summary.toggle();
+      }
+
+      getTargetSummary() {
+        return 'detailSummary' + this.contextIndex;
+      }
+    }
+
+    window.customElements.define(SrDetailCard.is, SrDetailCard);
+  </script>
+</dom-module>

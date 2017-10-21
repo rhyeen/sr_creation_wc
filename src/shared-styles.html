@@ -13,6 +13,33 @@
         --paper-badge-height: 25px;
       }
 
+      .view-container {
+        --app-primary-color: #373737;
+        display: block;
+      }
+
+      .no-context {
+        margin-top: 80px;
+        color: var(--google-grey-700);
+      }
+      .no-context p {
+        text-align: center;
+      }
+
+      .no-context .title {
+        @apply --paper-font-title;
+      }
+      
+      .no-context .tooltip {
+        @apply --paper-font-subhead;
+      }
+
+      .confirm-btn {
+        padding: 5px 15px;
+        min-width: auto;
+        text-transform: capitalize;
+      }
+
       .card-action-list {
         margin-top: 20px;
       }
@@ -95,6 +122,19 @@
         position: fixed;
         bottom: 20px;
         right: 20px;
+      }
+
+      paper-icon-button[hidden] {
+        display: none;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
       }
     </style>
   </template>

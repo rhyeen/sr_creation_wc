@@ -1,0 +1,82 @@
+<dom-module id="sr-image-card">
+  <template>
+    <style include="shared-styles">
+    </style>
+    <template is="dom-if" if="[[hasContextItem]]">
+      <paper-card image="http://localhost:4000/user/file/image/thumbnail/{{contextItem.thumbnail.link}}">
+        <app-toolbar>
+          <div main-title>{{contextItem.name}}</div>
+          <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Image
+              </paper-icon-item>
+              <paper-icon-item name="page">
+                <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
+                Delete Image
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <iron-collapse id="[[getTargetSummary()]]" class="summary">{{contextItem.caption}}</iron-collapse>
+        </div>
+        <div class="card-actions">
+          <paper-button><iron-icon icon="sr-icons:link"></iron-icon>Source</paper-button>
+          <paper-button><iron-icon icon="sr-icons:open-in-new"></iron-icon>Fullsize</paper-button>
+        </div>
+      </paper-card>
+    </template>
+    <template is="dom-if" if="[[!hasContextItem]]">
+      <div class="no-context">
+        <p class="title">This page has no images.</p>
+        <p class="tooltip">Add one using the "+" button below.</p>
+      </div>
+    </template>
+    <paper-fab icon="sr-icons:add" title="Add Image"></paper-fab>
+  </template>
+  <script>
+    class SrImageCard extends Polymer.Element {
+      static get is() { return 'sr-image-card'; }
+
+      static get properties() {
+        return {
+          hasContextItem: {
+            object: Boolean,
+            value: false
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_contextItemChanged(contextItem)',
+        ];
+      }
+
+      _contextItemChanged(contextItem) {
+        this.set('hasContextItem', !!contextItem);
+      }
+
+      toggleExpand() {
+        var iconButton = Polymer.dom(event).localTarget;
+        var summary = this.shadowRoot.querySelector("#" + this.getTargetSummary());
+        if (summary.opened) {
+          iconButton.icon = 'sr-icons:expand-more';
+        } else {
+          iconButton.icon = 'sr-icons:expand-less';
+        }
+        summary.toggle();
+      }
+
+      getTargetSummary() {
+        return 'imageSummary' + this.contextIndex;
+      }
+    }
+
+    window.customElements.define(SrImageCard.is, SrImageCard);
+  </script>
+</dom-module>

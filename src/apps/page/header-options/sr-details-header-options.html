@@ -1,4 +1,4 @@
-<dom-module id="sr-summary-header-options">
+<dom-module id="sr-details-header-options">
   <template>
     <style include="shared-styles">
     </style>
@@ -20,29 +20,29 @@
             slot="dropdown-trigger"
             disabled="[[disabled]]"></paper-icon-button>
         <paper-listbox slot="dropdown-content">
-          <paper-icon-item on-tap="triggerAddPage">
+          <paper-icon-item on-tap="triggerAddDetail">
             <iron-icon
-              icon="sr-icons:page-add"
+              icon="sr-icons:add-circle"
               slot="item-icon"></iron-icon>
-            Add a Page
+            Add a Detail
           </paper-icon-item>
-          <paper-icon-item on-tap="triggerDeletePage">
+          <paper-icon-item on-tap="triggerReorderDetails">
             <iron-icon
-                icon="sr-icons:delete"
+                icon="sr-icons:reorder"
                 slot="item-icon"></iron-icon>
-            Delete Page
+            Reorder Details
           </paper-icon-item>
         </paper-listbox>
       </paper-menu-button>
     </template>
   </template>
   <script>
-    class SrSummaryHeaderOptions extends Polymer.Element {
-      static get is() { return 'sr-summary-header-options'; }
+    class SrDetailsHeaderOptions extends Polymer.Element {
+      static get is() { return 'sr-details-header-options'; }
       
       static get properties() {
         return {
-          
+
         };
       }
 
@@ -54,14 +54,14 @@
         this.dispatchEvent(new CustomEvent('trigger-search', {bubbles: true, composed: true}));
       }
 
-      triggerAddPage(event) {
+      triggerAddDetail(event) {
         this._closeMenu(event);
-        this.dispatchEvent(new CustomEvent('trigger-add-page', {bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('trigger-add-detail', {bubbles: true, composed: true}));
       }
 
-      triggerDeletePage(event) {
+      triggerReorderDetails(event) {
         this._closeMenu(event);
-        this.dispatchEvent(new CustomEvent('trigger-delete-page', {bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('trigger-reorder-details', {bubbles: true, composed: true}));
       }
 
       goBack() {
@@ -73,6 +73,6 @@
       }
     }
 
-    window.customElements.define(SrSummaryHeaderOptions.is, SrSummaryHeaderOptions);
+    window.customElements.define(SrDetailsHeaderOptions.is, SrDetailsHeaderOptions);
   </script>
 </dom-module>
