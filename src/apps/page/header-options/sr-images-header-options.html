@@ -42,8 +42,21 @@
       
       static get properties() {
         return {
-
+          showPageConfirmation: {
+            type: Boolean,
+            value: false
+          }
         };
+      }
+
+      static get observers() {
+        return [
+          '_pageConfirmationTextChanged(pageConfirmationText)',
+        ];
+      }
+
+      _pageConfirmationTextChanged(pageConfirmationText) {
+        this.set('showPageConfirmation', pageConfirmationText !== null);
       }
 
       triggerPageConfirmation() {

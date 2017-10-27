@@ -25,7 +25,7 @@
             <sr-related-pages-header-options
                 related-pages-type="[[relatedPagesType]]"
                 disabled="[[disableMenuConfirmation]]"
-                show-page-confirmation="[[showPageConfirmation]]"></sr-related-pages-header-options>
+                page-confirmation-text="[[pageConfirmationText]]"></sr-related-pages-header-options>
           </app-toolbar>
         </app-header>
         <template is="dom-repeat" items="{{relatedPages}}">
@@ -54,9 +54,9 @@
             type: String,
             value: 'Related Pages'
           },
-          showPageConfirmation: {
-            type: Boolean,
-            value: false
+          pageConfirmationText: {
+            type: String,
+            value: null
           },
           disableMenuConfirmation: {
             type: Boolean,

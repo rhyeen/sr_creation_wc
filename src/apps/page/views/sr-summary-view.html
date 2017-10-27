@@ -4,6 +4,7 @@
 <link rel="import" href="../header-options/sr-summary-header-options.html">
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
 <link rel="import" href="../dialogs/sr-delete-page-dialog.html">
+<link rel="import" href="../dialogs/sr-add-page-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
 
 <dom-module id="sr-summary-view">
@@ -27,7 +28,7 @@
             <div main-title>[[menuTitle]]</div>
             <sr-summary-header-options
                 disabled="[[disableMenuConfirmation]]"
-                show-page-confirmation="[[showPageConfirmation]]"></sr-summary-header-options>
+                page-confirmation-text="[[pageConfirmationText]]"></sr-summary-header-options>
           </app-toolbar>
         </app-header>
         <template is="dom-if" if="[[!showAddPage]]">
@@ -42,6 +43,8 @@
         </template>
       </app-header-layout>
     </app-drawer-layout>
+    <sr-add-page-dialog
+        id="addPageDialog"></sr-add-page-dialog>
     <sr-page-search-dialog
         id="pageSearchDialog"></sr-page-search-dialog>
     <sr-delete-page-dialog
@@ -57,9 +60,9 @@
             type: String,
             value: 'Page Summary'
           },
-          showPageConfirmation: {
-            type: Boolean,
-            value: false
+          pageConfirmationText: {
+            type: String,
+            value: null
           },
           disableMenuConfirmation: {
             type: Boolean,
@@ -72,18 +75,21 @@
           },
           showAddPage: {
             type: Boolean,
-            value: true
+            value: false
           }
         };
       }
 
       ready() {
         super.ready();
+        // @DEBUG: remove after finished
+        this._triggerAddPageChangeListener(null);
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
         this.addEventListener('trigger-add-page', e => this._triggerAddPageChangeListener(e));
         this.addEventListener('trigger-delete-page', e => this._triggerDeletePageChangeListener(e));
         this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
         this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
+        this.addEventListener('trigger-add-page-dialog', e => this._triggerAddPageDialogChangeListener(e));
       }
 
       _toggleDrawerChangeListener(event) {
@@ -93,8 +99,14 @@
       _triggerAddPageChangeListener(event) {
         this.set('showAddPage', true);
         this.set('showBackButton', true);
-        this.set('showPageConfirmation', true);
+        this.set('pageConfirmationText', 'Save');
         this.set('menuTitle', 'Add a Page');
+        this.set('disableMenuConfirmation', true);
+        this._triggerAddPageDialogChangeListener(event);
+      }
+
+      _triggerAddPageDialogChangeListener(event) {
+        this.$.addPageDialog.toggle();
       }
 
       _triggerDeletePageChangeListener(event) {

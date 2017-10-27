@@ -24,7 +24,7 @@
             <div main-title>[[menuTitle]]</div>
             <sr-images-header-options
                 disabled="[[disableMenuConfirmation]]"
-                show-page-confirmation="[[showPageConfirmation]]"></sr-images-header-options>
+                page-confirmation-text="[[pageConfirmationText]]"></sr-images-header-options>
           </app-toolbar>
         </app-header>
         <template is="dom-repeat" items="{{page.images.list}}">
@@ -50,9 +50,9 @@
             type: String,
             value: 'Images'
           },
-          showPageConfirmation: {
-            type: Boolean,
-            value: false
+          pageConfirmationText: {
+            type: String,
+            value: null
           },
           disableMenuConfirmation: {
             type: Boolean,

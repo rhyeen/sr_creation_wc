@@ -1,0 +1,342 @@
+<dom-module id="sr-add-page-dialog">
+  <template>
+    <style include="shared-styles">
+      paper-dialog {
+        min-width: 350px;
+      }
+
+      /*paper-dropdown-menu {
+        min-width: 280px;
+      }*/
+
+      .top-padded {
+        margin-top: 20px;
+      }
+
+      .selected-item {
+        width: 100%;
+        background-color: var(--paper-indigo-500);
+        color: white;
+        height: 47px;
+        line-height: 47px;
+        margin: 8px 0;
+        border-radius: 47px;
+      }
+
+      .selected-item iron-icon {
+        padding: 0 10px;
+      }
+
+      .selected-item span {
+        font-weight: 500;
+      }
+
+      .selected-item paper-icon-button {
+        float: right;
+        margin: 3.5px;
+      }
+    </style>
+    <paper-dialog
+        id="internalAddPageDialog"
+        modal
+        auto-fit-on-attach="true">
+      <h2>Add a Page</h2>
+      <paper-dialog-scrollable>
+        <template is="dom-if" if="[[isExpectedStep(currentStep, 0)]]">
+          <paper-dropdown-menu
+              label="Page Type"
+              value="{{pageType}}">
+            <paper-listbox slot="dropdown-content">
+              <template is="dom-repeat" items="{{pageTypes}}">
+                <paper-item>{{item}}</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </template>
+        <template is="dom-if" if="[[isExpectedStep(currentStep, 1)]]">
+          <template is="dom-if" if="[[isNewPage(existingPage)]]">
+            <paper-input
+              label="[[pageType]] Page Name"
+              value="{{pageTitle}}"
+              required></paper-input>
+            <template is="dom-if" if="[[hasPageSuggestions(pageSuggestions)]]">
+              Link to an existing page:
+              <template is="dom-repeat" items="{{pageSuggestions}}">
+                <!-- <paper-item>
+                  <paper-item-body two-line>
+                    <div>{{item.name}}</div>
+                    <div secondary>{{item.id}}</div>
+                  </paper-item-body>
+                </paper-item> -->
+                <paper-icon-item
+                    on-tap="bindExistPage"
+                    value="{{index}}">
+                  <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+                  <paper-item-body two-line>
+                    <div>{{item.name}}</div>
+                    <div secondary>{{item.id}}</div>
+                  </paper-item-body>
+                </paper-icon-item>
+              </template>
+            </template>
+          </template>
+          <template is="dom-if" if="[[!isNewPage(existingPage)]]">
+            Selected page to link:
+            <div class="selected-item">
+              <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+              <span>{{existingPage.name}}</span>
+              <paper-icon-button icon="sr-icons:close" on-tap="clearExistingPage"></paper-icon-button>
+            </div>
+          </template>
+        </template>
+        <template is="dom-if" if="[[isExpectedStep(currentStep, 2)]]">
+          <paper-toggle-button
+            class="top-padded"
+            checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
+
+        </template>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <template is="dom-if" if="[[showBackButton(currentStep)]]">
+          <paper-button
+              raised
+              on-tap="backStep">Back</paper-button>
+          </paper-icon-button>
+        </template>
+        <template is="dom-if" if="[[showNextButton(currentStep)]]">
+          <paper-button
+              class="btn-primary"
+              raised autofocus
+              disabled="[[nextStepIsDisabled(currentStep, pageTitle, pageType)]]"
+              on-tap="nextStep">
+              [[getNextStepButtonText(currentStep, existingPage)]]
+          </paper-button>
+        </template>
+        <template is="dom-if" if="[[showDoneButton(currentStep)]]">
+          <paper-button
+              class="btn-primary"
+              raised dialog-confirm autofocus>Done</paper-button>
+        </template>
+      </div>
+    </paper-dialog>
+    <iron-ajax
+        id="getSearchPageResultsAjax"
+        url="http://localhost:4000/user/page/search"
+        handle-as="json"
+        on-response="handleSearchPageResults"
+        debounce-duration="300"></iron-ajax>
+  </template>
+  <script>
+    class SrAddPageDialog extends Polymer.Element {
+      static get is() { return 'sr-add-page-dialog'; }
+      
+      static get properties() {
+        return {
+          currentStep: {
+            type: Number,
+            value: 0
+          },
+          pageTypes: {
+            type: Array,
+            value: [
+              'Association',
+              'Campaign',
+              'Character',
+              'District',
+              'Era',
+              'Event',
+              'Group',
+              'History',
+              'Item',
+              'Landmark',
+              'Lore',
+              'Place',
+              'Quest',
+              'Race',
+              'Region',
+              'Report',
+              'Section',
+              'Set',
+              'Species',
+              'Story arc',
+              'Taxon',
+              'World',
+            ]
+          },
+          pageType: {
+            type: Object,
+            value: null
+          },
+          pageTitle: {
+            type: String,
+            value: null
+          },
+          existingPage: {
+            type: Object,
+            value: null
+          },
+          pageSuggestions: {
+            type: Array,
+            value: []
+          }
+        };
+      }
+
+      _getStepValues() {
+        return [
+          {
+            type: 'pageType',
+            showNextButton: true
+          },
+          {
+            type: 'pageTitle',
+            showNextButton: true
+          },
+          {
+            type: 'linkToPage',
+            showNextButton: true
+          }
+        ];
+      }
+
+      toggle() {
+        this.$.internalAddPageDialog.toggle();
+      }
+
+      static get observers() {
+        return [
+          '_pageTypeChanged(pageType)',
+          '_pageTitleChanged(pageTitle)',
+        ];
+      }
+
+      _pageTypeChanged(pageType) {
+        if (pageType) {
+          // if the page type changes, we cannot assume the page title is able to stay the same
+          this.set('pageTitle', null);
+          this.set('existingPage', null);
+          this.set('pageSuggestions', []);
+          // this.nextStep();
+        }
+      }
+
+      _pageTitleChanged(pageTitle) {
+        this._retrieveTitlePageSearchResults(pageTitle);
+      }
+
+      _retrieveTitlePageSearchResults(searchQuery) {
+        if (!searchQuery || searchQuery.length < 2) {
+          this.set('pageSuggestions', []);
+          return;
+        }
+        var params = {
+          query: searchQuery,
+          type: this._getPageTypeCode()
+        };
+        this.$.getSearchPageResultsAjax.params = params;
+        this.$.getSearchPageResultsAjax.generateRequest();
+      }
+
+      clearExistingPage() {
+        this.set('existingPage', null);
+      }
+
+      isNewPage(existingPage) {
+        return !existingPage;
+      }
+
+      hasPageSuggestions(pageSuggestions) {
+        return !!pageSuggestions && pageSuggestions.length > 0; 
+      }
+
+      getNextStepButtonText(currentStep, existingPage) {
+        if (currentStep == 1) {
+          return !existingPage ? 'New Page' : 'Link Page';
+        }
+        return 'Next';
+      }
+
+      bindExistPage(event) {
+        var index = event.currentTarget.value;
+        this.set('existingPage', this.pageSuggestions[index]);
+      }
+
+      handleSearchPageResults(event) {
+        var searchResults = [];
+        event.detail.response.forEach(function(result) {
+          searchResults.push(result);
+        });
+        this.set('pageSuggestions', searchResults);
+      }
+
+      showNextButton(currentStep) {
+        return this._getStepValues()[currentStep].showNextButton && !this.showDoneButton(currentStep);
+      }
+
+      showBackButton(currentStep) {
+        return currentStep > 0;
+      }
+
+      showDoneButton(currentStep) {
+        return currentStep == this._getStepValues().length - 1;
+      }
+
+      nextStep() {
+        this.set('currentStep', this.currentStep + 1);
+      }
+
+      nextStepIsDisabled(currentStep, pageTitle, pageType) {
+        if (currentStep == 0) {
+          return !this.pageType;
+        }
+        if (currentStep == 1) {
+          return !pageTitle;
+        }
+        return false;
+      }
+
+      backStep() {
+        this.set('currentStep', this.currentStep - 1);
+      }
+
+      done() {
+        this.$.internalAddPageDialog.toggle();
+      }
+
+      isExpectedStep(currentStep, expected) {
+        return currentStep == expected;
+      }
+
+      _getPageTypeCode() {
+        var pageTypeCodeMap = {
+          'Association': 'AS',
+          'Campaign': 'CA',
+          'Character': 'CH',
+          'District': 'DI',
+          'Era': 'EA',
+          'Event': 'EV',
+          'Group': 'GR',
+          'History': 'HI',
+          'Item': 'IT',
+          'Landmark': 'LM',
+          'Lore': 'LR',
+          'Place': 'PL',
+          'Quest': 'QU',
+          'Race': 'RA',
+          'Region': 'RG',
+          'Report': 'RP',
+          'Section': 'SE',
+          'Set': 'ST',
+          'Species': 'SP',
+          'Story arc': 'SA',
+          'Taxon': 'TX',
+          'World': 'WD',
+        }
+        return pageTypeCodeMap[this.pageType];
+      }
+    }
+
+    window.customElements.define(SrAddPageDialog.is, SrAddPageDialog);
+  </script>
+</dom-module>

@@ -24,7 +24,7 @@
             <div main-title>[[menuTitle]]</div>
             <sr-details-header-options
                 disabled="[[disableMenuConfirmation]]"
-                show-page-confirmation="[[showPageConfirmation]]"></sr-details-header-options>
+               page-confirmation-text="[[pageConfirmationText]]"></sr-details-header-options>
           </app-toolbar>
         </app-header>
         <template is="dom-repeat" items="{{page.details.list}}">
@@ -50,9 +50,9 @@
             type: String,
             value: 'Details'
           },
-          showPageConfirmation: {
-            type: Boolean,
-            value: false
+          pageConfirmationText: {
+            type: String,
+            value: null
           },
           disableMenuConfirmation: {
             type: Boolean,

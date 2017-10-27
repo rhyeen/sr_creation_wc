@@ -44,13 +44,15 @@
         return {
           addRelatedPageTitle: String,
           reorderRelatedPagesTitle: String,
+          showPageConfirmation: {
+            type: Boolean,
+            value: false
+          }
         };
       }
 
-      static get observers() {
-        return [
-          '_relatedPagesTypeChanged(relatedPagesType)',
-        ];
+      _pageConfirmationTextChanged(pageConfirmationText) {
+        this.set('showPageConfirmation', pageConfirmationText !== null);
       }
 
       _relatedPagesTypeChanged(relatedPagesType) {
