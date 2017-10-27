@@ -42,6 +42,7 @@
         auto-fit-on-attach="true">
       <h2>Add a Page</h2>
       <paper-dialog-scrollable>
+        <!-- page types -->
         <template is="dom-if" if="[[isExpectedStep(currentStep, 0)]]">
           <paper-dropdown-menu
               label="Page Type"
@@ -53,21 +54,16 @@
             </paper-listbox>
           </paper-dropdown-menu>
         </template>
+        <!-- page title -->
         <template is="dom-if" if="[[isExpectedStep(currentStep, 1)]]">
-          <template is="dom-if" if="[[isNewPage(existingPage)]]">
+          <template is="dom-if" if="[[!linkedPageSelected(existingPage)]]">
             <paper-input
               label="[[pageType]] Page Name"
               value="{{pageTitle}}"
               required></paper-input>
             <template is="dom-if" if="[[hasPageSuggestions(pageSuggestions)]]">
-              Link to an existing page:
+              <p>Link to an existing page:</p>
               <template is="dom-repeat" items="{{pageSuggestions}}">
-                <!-- <paper-item>
-                  <paper-item-body two-line>
-                    <div>{{item.name}}</div>
-                    <div secondary>{{item.id}}</div>
-                  </paper-item-body>
-                </paper-item> -->
                 <paper-icon-item
                     on-tap="bindExistPage"
                     value="{{index}}">
@@ -80,8 +76,8 @@
               </template>
             </template>
           </template>
-          <template is="dom-if" if="[[!isNewPage(existingPage)]]">
-            Selected page to link:
+          <template is="dom-if" if="[[linkedPageSelected(existingPage)]]">
+            <p>Selected page to link:</p>
             <div class="selected-item">
               <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
               <span>{{existingPage.name}}</span>
@@ -89,11 +85,49 @@
             </div>
           </template>
         </template>
+        <!-- link to previous page -->
         <template is="dom-if" if="[[isExpectedStep(currentStep, 2)]]">
           <paper-toggle-button
             class="top-padded"
             checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
-
+          <template is="dom-if" if="[[!linkedPageSelected(previousPage)]]">
+            <paper-dropdown-menu
+                label="Bound Page Type"
+                value="{{previousPageType}}"
+                disabled="[[linkToPreviousPage]]">
+              <paper-listbox slot="dropdown-content">
+                <template is="dom-repeat" items="{{pageTypes}}">
+                  <paper-item>{{item}}</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input
+              label="Bound [[previousPageType]] Page Name"
+              value="{{previousPageTitle}}"
+              disabled="[[!hasPreviousPageType(previousPageType)]]"></paper-input>
+            <template is="dom-if" if="[[hasPageSuggestions(pageSuggestions)]]">
+              <p>Link new page to an existing page:</p>
+              <template is="dom-repeat" items="{{pageSuggestions}}">
+                <paper-icon-item
+                    on-tap="bindPreviousPage"
+                    value="{{index}}">
+                  <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+                  <paper-item-body two-line>
+                    <div>{{item.name}}</div>
+                    <div secondary>{{item.id}}</div>
+                  </paper-item-body>
+                </paper-icon-item>
+              </template>
+            </template>
+          </template>
+          <template is="dom-if" if="[[linkedPageSelected(previousPage)]]">
+            <p>Selected page with which to link new page:</p>
+            <div class="selected-item">
+              <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+              <span>{{previousPage.name}}</span>
+              <paper-icon-button icon="sr-icons:close" on-tap="clearPreviousPage"></paper-icon-button>
+            </div>
+          </template>
         </template>
       </paper-dialog-scrollable>
       <div class="buttons">
@@ -115,8 +149,13 @@
         </template>
         <template is="dom-if" if="[[showDoneButton(currentStep)]]">
           <paper-button
+              class="btn-secondary"
+              on-tap="review"
+              raised dialog-confirm>Review</paper-button>
+          <paper-button
               class="btn-primary"
-              raised dialog-confirm autofocus>Done</paper-button>
+              on-tap="save"
+              raised dialog-confirm autofocus>Save</paper-button>
         </template>
       </div>
     </paper-dialog>
@@ -165,7 +204,7 @@
             ]
           },
           pageType: {
-            type: Object,
+            type: String,
             value: null
           },
           pageTitle: {
@@ -184,6 +223,18 @@
             type: Boolean,
             value: true
           },
+          previousPage: {
+            type: Object,
+            value: null
+          },
+          previousPageTitle: {
+            type: String,
+            value: null
+          },
+          previousPageType: {
+            type: String,
+            value: null
+          }
         };
       }
 
@@ -212,6 +263,8 @@
         return [
           '_pageTypeChanged(pageType)',
           '_pageTitleChanged(pageTitle)',
+          '_previousPageTitleChanged(previousPageTitle)',
+          '_linkToPreviousPageChanged(linkToPreviousPage)',
         ];
       }
 
@@ -226,28 +279,59 @@
       }
 
       _pageTitleChanged(pageTitle) {
-        this._retrieveTitlePageSearchResults(pageTitle);
+        this._retrieveTitlePageSearchResults(pageTitle, false);
       }
 
-      _retrieveTitlePageSearchResults(searchQuery) {
+      _previousPageTitleChanged(previousPageTitle) {
+        this._retrieveTitlePageSearchResults(previousPageTitle, true);
+      }
+
+      _linkToPreviousPageChanged(linkToPreviousPage) {
+        // don't show suggestions if link to previous page has been checked.
+        if (linkToPreviousPage) {
+          this.set('pageSuggestions', []);
+          this.set('previousPageTitle', null);
+          this._setLinkToPreviousPage();
+        } else {
+          this.set('previousPage', null);
+        }
+      }
+
+      _setLinkToPreviousPage() {
+          this.set('previousPage', {
+            name: this.page.name,
+            id: this.page.id
+          });
+      }
+
+      _retrieveTitlePageSearchResults(searchQuery, isPreviousPage) {
         if (!searchQuery || searchQuery.length < 2) {
           this.set('pageSuggestions', []);
           return;
         }
         var params = {
           query: searchQuery,
-          type: this._getPageTypeCode()
+          type: this._getPageTypeCode(isPreviousPage)
         };
         this.$.getSearchPageResultsAjax.params = params;
         this.$.getSearchPageResultsAjax.generateRequest();
+      }
+
+      hasPreviousPageType(previousPageType) {
+        return !!previousPageType;
       }
 
       clearExistingPage() {
         this.set('existingPage', null);
       }
 
-      isNewPage(existingPage) {
-        return !existingPage;
+      clearPreviousPage() {
+        this.set('linkToPreviousPage', false);
+        this.set('previousPage', null);
+      }
+
+      linkedPageSelected(existingPage) {
+        return !!existingPage;
       }
 
       hasPageSuggestions(pageSuggestions) {
@@ -264,6 +348,11 @@
       bindExistPage(event) {
         var index = event.currentTarget.value;
         this.set('existingPage', this.pageSuggestions[index]);
+      }
+
+      bindPreviousPage(event) {
+        var index = event.currentTarget.value;
+        this.set('previousPage', this.pageSuggestions[index]);
       }
 
       handleSearchPageResults(event) {
@@ -287,7 +376,11 @@
       }
 
       nextStep() {
-        this.set('currentStep', this.currentStep + 1);
+        var nextStepIndex = this.currentStep + 1;
+        if (nextStepIndex == 2) {
+          this.set('pageSuggestions', []);
+        }
+        this.set('currentStep', nextStepIndex);
       }
 
       nextStepIsDisabled(currentStep, pageTitle, pageType) {
@@ -301,7 +394,11 @@
       }
 
       backStep() {
-        this.set('currentStep', this.currentStep - 1);
+        var previousStepIndex = this.currentStep - 1;
+        if (previousStepIndex == 1) {
+          this.set('pageSuggestions', []);
+        }
+        this.set('currentStep', previousStepIndex);
       }
 
       done() {
@@ -312,7 +409,7 @@
         return currentStep == expected;
       }
 
-      _getPageTypeCode() {
+      _getPageTypeCode(isPreviousPage) {
         var pageTypeCodeMap = {
           'Association': 'AS',
           'Campaign': 'CA',
@@ -336,6 +433,9 @@
           'Story arc': 'SA',
           'Taxon': 'TX',
           'World': 'WD',
+        }
+        if (isPreviousPage) {
+          return pageTypeCodeMap[this.previousPageType];
         }
         return pageTypeCodeMap[this.pageType];
       }
