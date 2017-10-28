@@ -90,10 +90,10 @@
           <paper-toggle-button
             class="top-padded"
             checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
-          <template is="dom-if" if="[[!linkedPageSelected(previousPage)]]">
+          <template is="dom-if" if="[[!linkedPageSelected(linkedPage)]]">
             <paper-dropdown-menu
                 label="Bound Page Type"
-                value="{{previousPageType}}"
+                value="{{linkedPageType}}"
                 disabled="[[linkToPreviousPage]]">
               <paper-listbox slot="dropdown-content">
                 <template is="dom-repeat" items="{{pageTypes}}">
@@ -102,9 +102,9 @@
               </paper-listbox>
             </paper-dropdown-menu>
             <paper-input
-              label="Bound [[previousPageType]] Page Name"
-              value="{{previousPageTitle}}"
-              disabled="[[!hasPreviousPageType(previousPageType)]]"></paper-input>
+              label="Bound [[linkedPageType]] Page Name"
+              value="{{linkedPageTitle}}"
+              disabled="[[!hasPreviousPageType(linkedPageType)]]"></paper-input>
             <template is="dom-if" if="[[hasPageSuggestions(pageSuggestions)]]">
               <p>Link new page to an existing page:</p>
               <template is="dom-repeat" items="{{pageSuggestions}}">
@@ -120,11 +120,11 @@
               </template>
             </template>
           </template>
-          <template is="dom-if" if="[[linkedPageSelected(previousPage)]]">
+          <template is="dom-if" if="[[linkedPageSelected(linkedPage)]]">
             <p>Selected page with which to link new page:</p>
             <div class="selected-item">
               <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
-              <span>{{previousPage.name}}</span>
+              <span>{{linkedPage.name}}</span>
               <paper-icon-button icon="sr-icons:close" on-tap="clearPreviousPage"></paper-icon-button>
             </div>
           </template>
@@ -223,15 +223,15 @@
             type: Boolean,
             value: true
           },
-          previousPage: {
+          linkedPage: {
             type: Object,
             value: null
           },
-          previousPageTitle: {
+          linkedPageTitle: {
             type: String,
             value: null
           },
-          previousPageType: {
+          linkedPageType: {
             type: String,
             value: null
           }
@@ -263,7 +263,7 @@
         return [
           '_pageTypeChanged(pageType)',
           '_pageTitleChanged(pageTitle)',
-          '_previousPageTitleChanged(previousPageTitle)',
+          '_linkedPageTitleChanged(linkedPageTitle)',
           '_linkToPreviousPageChanged(linkToPreviousPage)',
         ];
       }
@@ -282,23 +282,23 @@
         this._retrieveTitlePageSearchResults(pageTitle, false);
       }
 
-      _previousPageTitleChanged(previousPageTitle) {
-        this._retrieveTitlePageSearchResults(previousPageTitle, true);
+      _linkedPageTitleChanged(linkedPageTitle) {
+        this._retrieveTitlePageSearchResults(linkedPageTitle, true);
       }
 
       _linkToPreviousPageChanged(linkToPreviousPage) {
         // don't show suggestions if link to previous page has been checked.
         if (linkToPreviousPage) {
           this.set('pageSuggestions', []);
-          this.set('previousPageTitle', null);
+          this.set('linkedPageTitle', null);
           this._setLinkToPreviousPage();
         } else {
-          this.set('previousPage', null);
+          this.set('linkedPage', null);
         }
       }
 
       _setLinkToPreviousPage() {
-          this.set('previousPage', {
+          this.set('linkedPage', {
             name: this.page.name,
             id: this.page.id
           });
@@ -317,8 +317,8 @@
         this.$.getSearchPageResultsAjax.generateRequest();
       }
 
-      hasPreviousPageType(previousPageType) {
-        return !!previousPageType;
+      hasPreviousPageType(linkedPageType) {
+        return !!linkedPageType;
       }
 
       clearExistingPage() {
@@ -327,7 +327,7 @@
 
       clearPreviousPage() {
         this.set('linkToPreviousPage', false);
-        this.set('previousPage', null);
+        this.set('linkedPage', null);
       }
 
       linkedPageSelected(existingPage) {
@@ -352,7 +352,7 @@
 
       bindPreviousPage(event) {
         var index = event.currentTarget.value;
-        this.set('previousPage', this.pageSuggestions[index]);
+        this.set('linkedPage', this.pageSuggestions[index]);
       }
 
       handleSearchPageResults(event) {
@@ -373,6 +373,14 @@
 
       showDoneButton(currentStep) {
         return currentStep == this._getStepValues().length - 1;
+      }
+
+      setStep(step) {
+        if (step < 0 || step >= this._getStepValues().length) {
+          step = 0;
+        }
+        this.set('pageSuggestions', []);
+        this.set('currentStep', step);
       }
 
       nextStep() {
@@ -401,9 +409,33 @@
         this.set('currentStep', previousStepIndex);
       }
 
-      done() {
-        this.$.internalAddPageDialog.toggle();
+      review() {
+        this.dispatchEvent(new CustomEvent('review-adding-page', {bubbles: true,
+          composed: true,
+          detail: this._createAddedPage()
+        }));
       }
+
+      _createAddedPage() {
+        return {
+          type: this.pageType,
+          typeCode: this._getPageTypeCode(false),
+          name: !!this.existingPage ? this.existingPage.name : this.pageTitle,
+          id: !!this.existingPage ? this.existingPage.id : null,
+          linkedPage: this.linkedPage
+        };
+      }
+
+      save() {
+        this.dispatchEvent(new CustomEvent('save-adding-page', {bubbles: true,
+          composed: true,
+          detail: this._createAddedPage()
+        }));
+      }
+
+      // done() {
+      //   this.$.internalAddPageDialog.toggle();
+      // }
 
       isExpectedStep(currentStep, expected) {
         return currentStep == expected;
@@ -435,7 +467,7 @@
           'World': 'WD',
         }
         if (isPreviousPage) {
-          return pageTypeCodeMap[this.previousPageType];
+          return pageTypeCodeMap[this.linkedPageType];
         }
         return pageTypeCodeMap[this.pageType];
       }

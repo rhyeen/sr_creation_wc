@@ -39,7 +39,8 @@
         </template>
         <template is="dom-if" if="[[showAddPage]]">
           <sr-add-page-card
-              page="[[page]]"></sr-add-page-card>
+              page="[[page]]"
+              added-page="[[addedPage]]"></sr-add-page-card>
         </template>
       </app-header-layout>
     </app-drawer-layout>
@@ -50,6 +51,13 @@
         id="pageSearchDialog"></sr-page-search-dialog>
     <sr-delete-page-dialog
         id="deletePageDialog"></sr-delete-page-dialog>
+    <iron-ajax
+        id="createPageAjax"
+        url="http://localhost:4000/user/page"
+        handle-as="json"
+        method="POST"
+        on-response="handleCreatePage"
+        debounce-duration="300"></iron-ajax>
   </template>
   <script>
     class SrSummaryView extends Polymer.Element {
@@ -77,20 +85,29 @@
           showAddPage: {
             type: Boolean,
             value: false
+          },
+          addedPage: {
+            type: Object,
+            value: {}
           }
         };
       }
 
       ready() {
         super.ready();
-        // @DEBUG: remove after finished
-        this._triggerAddPageChangeListener(null);
+        // @DEBUG: remove after finished testing adding new page
+        // this._triggerAddPageChangeListener(null);
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
         this.addEventListener('trigger-add-page', e => this._triggerAddPageChangeListener(e));
         this.addEventListener('trigger-delete-page', e => this._triggerDeletePageChangeListener(e));
         this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
         this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
-        this.addEventListener('trigger-add-page-dialog', e => this._triggerAddPageDialogChangeListener(e));
+        this.addEventListener('trigger-add-page-dialog', e => this._triggerAddPageDialogChangeListener(e, null));
+        this.addEventListener('trigger-add-page-dialog-0', e => this._triggerAddPageDialogChangeListener(e, 0));
+        this.addEventListener('trigger-add-page-dialog-1', e => this._triggerAddPageDialogChangeListener(e, 1));
+        this.addEventListener('trigger-add-page-dialog-2', e => this._triggerAddPageDialogChangeListener(e, 2));
+        this.addEventListener('review-adding-page', e => this._triggerReviewAddingPageListener(e));
+        this.addEventListener('save-adding-page', e => this._triggerSaveAddingPageListener(e));
       }
 
       _toggleDrawerChangeListener(event) {
@@ -98,15 +115,13 @@
       }
 
       _triggerAddPageChangeListener(event) {
-        this.set('showAddPage', true);
-        this.set('showBackButton', true);
-        this.set('pageConfirmationText', 'Save');
-        this.set('menuTitle', 'Add a Page');
-        this.set('disableMenuConfirmation', true);
-        this._triggerAddPageDialogChangeListener(event);
+        this._triggerAddPageDialogChangeListener(event, 0);
       }
 
-      _triggerAddPageDialogChangeListener(event) {
+      _triggerAddPageDialogChangeListener(event, jumpToStep) {
+        if (jumpToStep !== null) {
+          this.$.addPageDialog.setStep(jumpToStep);
+        }
         this.$.addPageDialog.toggle();
       }
 
@@ -115,11 +130,55 @@
       }
 
       _triggerPageConfirmationChangeListener(event) {
-        
+        if (this.showAddPage) {
+          this._saveAddedPage(this.addedPage);
+        } else {
+          console.error('Unexpected state: sr-summary-view.html._triggerPageConfirmationChangeListener()');
+        }
+      }
+
+      _saveAddedPage(addedPage) {
+        if (addedPage.id) {
+          this._addPageLink(addedPage);
+        } else {
+          this._createNewPage(addedPage);
+        }
+      }
+
+      _addPageLink(addedPage) {
+        debugger;
+      }
+
+      _createNewPage(addedPage) {
+        var params = {
+          type: addedPage.typeCode,
+          name: addedPage.name,
+          id: addedPage.linkedPage.id,
+        };
+        this.$.createPageAjax.params = params;
+        this.$.createPageAjax.generateRequest();
+      }
+
+      handleCreatePage(event) {
+        var id = event.detail.response.id;
+        window.location.href = window.location.origin + "/page/" + id;
       }
 
       _triggerSearchChangeListener(event) {
         this.$.pageSearchDialog.toggle();
+      }
+
+      _triggerReviewAddingPageListener(event) {
+        this.set('showAddPage', true);
+        this.set('showBackButton', true);
+        this.set('pageConfirmationText', 'Save');
+        this.set('menuTitle', 'Add a Page');
+        this.set('disableMenuConfirmation', false);
+        this.set('addedPage', event.detail);
+      }
+
+      _triggerSaveAddingPageListener(event) {
+        this._saveAddedPage(event.detail);
       }
     }
 

@@ -1,107 +1,84 @@
 <dom-module id="sr-add-page-card">
   <template>
     <style include="shared-styles">
-      .top-padded {
-        margin-top: 20px;
-      }
-
-      .selected-item {
-        width: 100%;
-        background-color: var(--paper-indigo-500);
-        color: white;
-        height: 47px;
-        line-height: 47px;
-        margin: 8px 0;
-        border-radius: 47px;
-      }
-
-      .selected-item span {
-        padding: 0 23.5px;
-        font-weight: 500;
-      }
-
-      .selected-item paper-icon-button {
-        float: right;
-        margin: 3.5px;
-      }
-
-      paper-radio-group {
-        margin: 20px;
-      }
+      
     </style>
-    <!-- <paper-radio-group selected="{{creationAction}}">
-      <paper-radio-button name="link">Bind to an existing page</paper-radio-button>
-      <paper-radio-button name="new">Create a new page</paper-radio-button>
-    </paper-radio-group> -->
-    <!-- <template is="dom-if" if="[[shouldCreateNewPage(creationAction)]]"> -->
-    <paper-card>
-      <app-toolbar>
-        <div main-title>Create a new page</div>
-      </app-toolbar>
-      <div class="card-content">
-        <paper-dropdown-menu label="Page Type">
-          <paper-listbox slot="dropdown-content" class="dropdown-content">
-            <template is="dom-repeat" items="{{pageTypes}}">
-              <paper-item>{{item}}</paper-item>
-            </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <!-- <paper-input
-            label="New Page Title"
-            required></paper-input> -->
-        <template is="dom-if" if="[[!pageSearchResult.text]]">
-          <paper-autocomplete
-              id="pageSearchInput"
-              label="Search for Page"
-              required
-              remote-source
-              show-results-on-focus></paper-autocomplete>
-        </template>
-        <template is="dom-if" if="[[pageSearchResult.text]]">
-          <div class="selected-item">
-            <span>{{pageSearchResult.text}}</span>
-            <paper-icon-button icon="sr-icons:close" on-tap="clearPageSearchResult"></paper-icon-button>
-          </div>
-        </template>
-        <paper-textarea label="Summary"></paper-textarea>
-      </div>
-      <div class="card-actions">
-        <paper-toggle-button
-            class="top-padded"
-            checked="{{linkToPreviousPage}}">Link to previous page</paper-toggle-button>
-        <paper-autocomplete
-            label="Linked Page"
-            required
-            text="{{linkedPageText}}"
-            value="{{linkedPageValue}}"
-            disabled="[[linkToPreviousPage]]"
-            show-results-on-focus></paper-autocomplete>
-      </div>
-    </paper-card>
-    <!-- </template> -->
-    <!-- <template is="dom-if" if="[[!shouldCreateNewPage(creationAction)]]">
+    <template is="dom-if" if="[[addedPage.id]]">
       <paper-card>
         <app-toolbar>
-          <div main-title>Bind to an existing page</div>
+          <div main-title>Review Adding Pages Link</div>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item on-tap="togglePageTypeDialog">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit Pages Link Details
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
         </app-toolbar>
         <div class="card-content">
-          <template is="dom-if" if="[[!pageSearchResult.text]]">
-            <paper-autocomplete
-                id="pageSearchInput"
-                label="Search for Page"
-                required
-                remote-source
-                show-results-on-focus></paper-autocomplete>
-          </template>
-          <template is="dom-if" if="[[pageSearchResult.text]]">
-            <div class="selected-item">
-              <span>{{pageSearchResult.text}}</span>
-              <paper-icon-button icon="sr-icons:close" on-tap="clearPageSearchResult"></paper-icon-button>
-            </div>
-          </template>
+          <paper-icon-item
+              on-tap="togglePageTitleDialog">
+            <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+            <paper-item-body two-line>
+              <div>{{addedPage.name}}</div>
+              <div secondary>{{addedPage.id}}</div>
+            </paper-item-body>
+          </paper-icon-item>
+          <paper-icon-item
+              on-tap="toggleLinkedPageDialog">
+            <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+            <paper-item-body two-line>
+              <div>{{addedPage.linkedPage.name}}</div>
+              <div secondary>{{addedPage.linkedPage.id}}</div>
+            </paper-item-body>
+          </paper-icon-item>
         </div>
       </paper-card>
-    </template> -->
+    </template>
+    <template is="dom-if" if="[[!addedPage.id]]">
+      <paper-card>
+        <app-toolbar>
+          <div main-title>Review New Page</div>
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item on-tap="togglePageTypeDialog">
+                <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
+                Edit New Page Details
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </app-toolbar>
+        <div class="card-content">
+          <paper-icon-item
+              on-tap="togglePageTypeDialog">
+            <iron-icon icon="sr-icons:folder" slot="item-icon"></iron-icon>
+            <paper-item-body two-line>
+              <div>{{addedPage.type}}</div>
+              <div secondary>New Page Type</div>
+            </paper-item-body>
+          </paper-icon-item>
+          <paper-icon-item
+              on-tap="togglePageTitleDialog">
+            <iron-icon icon="sr-icons:file" slot="item-icon"></iron-icon>
+            <paper-item-body two-line>
+              <div>{{addedPage.name}}</div>
+              <div secondary>New Page Name</div>
+            </paper-item-body>
+          </paper-icon-item>
+          <paper-icon-item
+              on-tap="toggleLinkedPageDialog">
+            <iron-icon icon="sr-icons:alt-link" slot="item-icon"></iron-icon>
+            <paper-item-body two-line>
+              <div>{{addedPage.linkedPage.name}}</div>
+              <div secondary>Linked to New Page</div>
+            </paper-item-body>
+          </paper-icon-item>
+        </div>
+      </paper-card>
+    </template>
   </template>
 
   <script>
@@ -110,144 +87,22 @@
 
       static get properties() {
         return {
-          linkToPreviousPage: {
-            type: Boolean,
-            value: true
-          },
-          linkedPageText: {
-            type: String,
-            value: null
-          },
-          linkedPageValue: {
-            type: String,
-            value: null
-          },
-          pageTypes: {
-            type: Array,
-            value: []
-          },
-          searchPageParams: {
-            type: Object,
-            value: {}
-          },
-          pageSearchResult: {
-            type: Object,
-            value: {}
-          }
+          
         };
       }
 
-      static get observers() {
-        return [
-          '_linkToPreviousPageChanged(linkToPreviousPage)',
-        ];
+      togglePageTypeDialog(event) {
+        this.dispatchEvent(new CustomEvent('trigger-add-page-dialog-0', {bubbles: true, composed: true}));
       }
 
-      constructor() {
-        super();
-        this._setLinkedPageDefaults();
-        this._setPageTypes();
-        // this.$.pageSearchInput.queryFn = this.searchQueryResults;
-        // var newSearch = this.searchQueryResults();
-        // this.set('titleSearches', newSearch);
+      togglePageTitleDialog(event) {
+        this.dispatchEvent(new CustomEvent('trigger-add-page-dialog-1', {bubbles: true, composed: true}));
       }
 
-      ready() {
-        super.ready();
-        this.addEventListener('autocomplete-change', e => this._autocompleteChangeListener(e));
-        this.addEventListener('autocomplete-selected', e => this._autocompleteSelectedListener(e));
+      toggleLinkedPageDialog(event) {
+        this.dispatchEvent(new CustomEvent('trigger-add-page-dialog-2', {bubbles: true, composed: true}));
       }
 
-      _autocompleteChangeListener(event) {
-        this._retrieveTitlePageSearchResults(event.detail.text);
-      }
-
-      _autocompleteSelectedListener(event) {
-        this.set('pageSearchResult', {
-          value: event.detail.value,
-          text: event.detail.text
-        }); 
-      }
-
-      clearPageSearchResult() {
-        this.set('pageSearchResult', {});
-      }
-
-      _retrieveTitlePageSearchResults(searchQuery) {
-        if (!searchQuery || searchQuery.length < 2) {
-          this._setSearchSuggestions([]);
-          return;
-        }
-        var params = {
-          query: searchQuery,
-          type: 'CH'
-        };
-        this.set('searchPageParams', params);
-        this.$.getSearchPageResultsAjax.params = params;
-        this.$.getSearchPageResultsAjax.generateRequest();
-      }
-
-      handleSearchPageResults(event) {
-        var searchResults = [];
-        event.detail.response.forEach(function(result) {
-          searchResults.push({
-            text: result.name,
-            value: result.id
-          });
-        });
-        this._setSearchSuggestions(searchResults);
-      }
-
-      _setSearchSuggestions(searchResults) {
-        var paperSearchInput = this.shadowRoot.querySelector("#" + "pageSearchInput");
-        if (!paperSearchInput) {
-          return;
-        }
-        paperSearchInput.suggestions(searchResults);
-      }
-
-      _linkToPreviousPageChanged(linkToPreviousPage) {
-        if (linkToPreviousPage) {
-          this._setLinkedPageDefaults();
-        }
-      }
-
-      _setLinkedPageDefaults() {
-        if (!this.page) {
-          console.log('@DEBUG: page not found. Remove check after debugging.');
-          return;
-        }
-        console.log('@DEBUG: page found. Remove check after debugging.');
-        this.set('linkedPageText', this.page.name);
-        this.set('linkedPageValue', this.page.id);
-      }
-
-      _setPageTypes() {
-        this.set('pageTypes', [
-          'Association',
-          'Campaign',
-          'Character',
-          'District',
-          'Era',
-          'Event',
-          'Group',
-          'History',
-          'Item',
-          'Landmark',
-          'Lore',
-          'Place',
-          'Quest',
-          'Race',
-          'Region',
-          'Report',
-          'Section',
-          'Set',
-          'Species',
-          'Story arc',
-          'Taxon',
-          'World',
-        ]);
-      }
     }
 
     window.customElements.define(SrAddPageCard.is, SrAddPageCard);
