@@ -22,7 +22,7 @@
         <paper-menu-button dynamic-align="true">
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
           <paper-listbox slot="dropdown-content">
-            <paper-icon-item name="page">
+            <paper-icon-item on-tap="editSummary">
               <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
               Edit Summary
             </paper-icon-item>
@@ -74,6 +74,13 @@
 
       _pageIdChanged(pageId) {
         this.set('baseRoute', this._getBaseRoute(pageId));
+      }
+
+      editSummary() {
+        this.dispatchEvent(new CustomEvent('edit-summary', {
+          bubbles: true,
+          composed: true,
+        }));
       }
 
       _getBaseRoute(pageId) {

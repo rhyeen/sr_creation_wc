@@ -104,7 +104,8 @@
             <paper-input
               label="Bound [[linkedPageType]] Page Name"
               value="{{linkedPageTitle}}"
-              disabled="[[!hasPreviousPageType(linkedPageType)]]"></paper-input>
+              disabled="[[!hasPreviousPageType(linkedPageType)]]"
+              maxlength="140"></paper-input>
             <template is="dom-if" if="[[hasPageSuggestions(pageSuggestions)]]">
               <p>Link new page to an existing page:</p>
               <template is="dom-repeat" items="{{pageSuggestions}}">
@@ -410,7 +411,8 @@
       }
 
       review() {
-        this.dispatchEvent(new CustomEvent('review-adding-page', {bubbles: true,
+        this.dispatchEvent(new CustomEvent('review-adding-page', {
+          bubbles: true,
           composed: true,
           detail: this._createAddedPage()
         }));
@@ -427,7 +429,8 @@
       }
 
       save() {
-        this.dispatchEvent(new CustomEvent('save-adding-page', {bubbles: true,
+        this.dispatchEvent(new CustomEvent('save-adding-page', {
+          bubbles: true,
           composed: true,
           detail: this._createAddedPage()
         }));

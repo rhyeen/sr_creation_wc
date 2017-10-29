@@ -1,0 +1,293 @@
+<dom-module id="sr-edit-summary-card">
+  <template>
+    <style include="shared-styles">
+      .property-title {
+        font-weight: 700;
+      }
+    </style>
+    <paper-card>
+      <app-toolbar>
+        <div main-title>Summary Details</div>
+      </app-toolbar>
+      <div class="card-content">
+        <paper-input
+            label="Page Name"
+            value="{{pageTitle}}"></paper-input>
+        <paper-textarea
+            label="Page Summary"
+            value="{{pageSummary}}"
+            char-counter
+            maxlength="300"></paper-textarea>
+      </div>
+    </paper-card>
+    <paper-card>
+      <app-toolbar>
+        <div main-title>Properties</div>
+        <template is="dom-if" if="[[!reorderingProperties]]">
+          <paper-menu-button dynamic-align="true">
+            <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
+            <paper-listbox slot="dropdown-content">
+              <paper-icon-item
+                  on-tap="addProperty">
+                <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
+                Add Property
+              </paper-icon-item>
+              <paper-icon-item
+                  on-tap="reorderProperties">
+                <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
+                Reorder Properties
+              </paper-icon-item>
+            </paper-listbox>
+          </paper-menu-button>
+        </template>
+        <template is="dom-if" if="[[reorderingProperties]]">
+          <paper-icon-button icon="sr-icons:done" on-tap="confirmReorderProperties"></paper-icon-button>
+        </template>
+      </app-toolbar>
+      <div class="card-action-list">
+        <template is="dom-repeat" items="{{pageProperties}}">
+          <template is="dom-if" if="[[!reorderingProperties]]">
+            <paper-item on-tap="editProperty">
+              <paper-item-body>
+                <div>
+                  <span class="property-title">[[item.key]]:</span>
+                  <span class="property-value">[[item.value]]</span>
+                </div>
+              </paper-item-body>
+                <paper-icon-button
+                    icon="sr-icons:close"
+                    on-tap="deleteProperty"
+                    value="[[index]]"></paper-icon-button>
+            </paper-item>
+          </template>
+          <template is="dom-if" if="[[reorderingProperties]]">
+            <paper-item>
+              <paper-item-body>
+                <div>
+                  <span class="property-title">[[item.key]]:</span>
+                  <span class="property-value">[[item.value]]</span>
+                </div>
+              </paper-item-body>
+              <paper-icon-button
+                  icon="sr-icons:send-to-top"
+                  on-tap="movePropertyToTop"
+                  value="[[index]]"
+                  disabled="[[isFirstElement(index)]]"></paper-icon-button>
+              <paper-icon-button
+                  icon="sr-icons:arrow-upward"
+                  on-tap="movePropertyUp"
+                  value="[[index]]"
+                  disabled="[[isFirstElement(index)]]"></paper-icon-button>
+              <paper-icon-button
+                  icon="sr-icons:arrow-downward"
+                  on-tap="movePropertyDown"
+                  value="[[index]]"
+                  disabled="[[isLastElement(index, pageProperties)]]"></paper-icon-button>
+              <paper-icon-button
+                  icon="sr-icons:send-to-bottom"
+                  on-tap="movePropertyToBottom"
+                  value="[[index]]"
+                  disabled="[[isLastElement(index, pageProperties)]]"></paper-icon-button>
+            </paper-item>
+          </template>
+        <!--   <div class="property">
+            <paper-input
+                label="Property Key"
+                value="{{item.key}}"
+                on-input="pagePropertyChanged"></paper-input>
+            <paper-input
+                label="Property Value"
+                value="{{item.value}}"
+                disabled="[[keyIsEmpty(item.key)]]"
+                on-input="pagePropertyChanged"></paper-input>
+          </div> -->
+        </template>
+        <!-- <paper-icon-item>
+          <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
+          Add a New Property
+        </paper-icon-item> -->
+      </div>
+      <div class="card-actions">
+        <paper-button>
+          <iron-icon icon="sr-icons:add-circle"></iron-icon>
+          Add Property
+        </paper-button>
+      </div>
+    </paper-card>
+    <iron-ajax
+        id="editPageSummaryAjax"
+        url="http://localhost:4000/user/page/summary"
+        handle-as="json"
+        method="PUT"
+        on-response="handleEditSummary"
+        debounce-duration="300"></iron-ajax>
+  </template>
+  <script>
+    class SrEditSummaryCard extends Polymer.Element {
+      static get is() { return 'sr-edit-summary-card'; }
+      
+      static get properties() {
+        return {
+          pageSummary: {
+            text: String,
+            value: null,
+          },
+          pageTitle: {
+            text: String,
+            value: null,
+          },
+          pageProperties: {
+            text: Array,
+            value: null,
+          },
+          reorderingProperties: {
+            type: Boolean,
+            value: false
+          },
+        };
+      }
+
+      // static get observers() {
+      //   return [
+      //     '_pagePropertiesChanged(pageProperties)',
+      //   ];
+      // }
+
+      // keyIsEmpty(propertyKey) {
+      //   return !propertyKey;
+      // }
+
+      // _pagePropertiesChanged(pageProperties) {
+      //   this._ensureEmptyLastProperty(pageProperties);
+      // }
+
+      // pagePropertyChanged(event) {
+      //   this._ensureEmptyLastProperty(this.pageProperties);
+      // }
+
+      // _ensureEmptyLastProperty(pageProperties) {
+      //   if (!this._shouldAddEmptyProperty(pageProperties)) {
+      //     return;
+      //   }
+      //   if (!pageProperties) {
+      //     pageProperties = [];
+      //   }
+      //   pageProperties.push({
+      //     key: null,
+      //     value: null
+      //   });
+      //   this.set('pageProperties', pageProperties);
+      // }
+
+      // _shouldAddEmptyProperty(pageProperties) {
+      //   if (!pageProperties || pageProperties.length <= 0) {
+      //     return true;
+      //   }
+      //   var lastProperty = pageProperties[pageProperties.length - 1];
+      //   return (lastProperty.key !== null && lastProperty.key !== '') || (lastProperty.value !== null && lastProperty.value !== '');
+      // }
+
+      ready() {
+        super.ready();
+        // we want to copy it over so that if the user cancels, we don't overwrite what was previously there.
+        // we will update the page's values at handleEditSummary()
+        this.set('pageTitle', this.page.name);
+        this.set('pageSummary', this.page.summary.text);
+        this.set('pageProperties', this._copyJson(this.page.summary.properties));
+        // this.set('pageProperties', [{key: "1", value: "2"}, {key: "3", value: "4"}]);
+      }
+
+      _copyJson(jsonObject) {
+        return JSON.parse(JSON.stringify(jsonObject));
+      }
+
+      reorderProperties() {
+        this.set('reorderingProperties', true);
+      }
+
+      confirmReorderProperties() {
+        this.set('reorderingProperties', false);
+      }
+
+      isLastElement(index, list) {
+        return index >= list.length - 1;
+      }
+
+      isFirstElement(index) {
+        return index <= 0;
+      }
+
+      movePropertyUp(event) {
+        var index = event.currentTarget.value;
+        this._moveProperty(index, index - 1);
+      }
+
+      _moveProperty(oldIndex, newIndex) {
+        this.splice('pageProperties', newIndex, 0, this.pageProperties.splice(oldIndex, 1)[0]);
+      }
+
+      movePropertyDown(event) {
+        var index = event.currentTarget.value;
+        this._moveProperty(index, index + 1);
+      }
+
+      movePropertyToTop(event) {
+        var index = event.currentTarget.value;
+        this._moveProperty(index, 0);
+      }
+
+      movePropertyToBottom(event) {
+        var index = event.currentTarget.value;
+        this._moveProperty(index, this.pageProperties.length - 1);
+      }
+
+      deleteProperty(event) {
+        var index = event.currentTarget.value;
+        this.splice('pageProperties', index, 1);
+      }
+
+      editProperty(event) {
+        // if the paper-item-button is clicked, it will propogate
+        // to parent.  We don't want that...
+        if (event.target.localName === 'paper-icon-button') {
+          return;
+        }
+        console.log('@DEBUG');
+      }
+
+      editPageSummary() {
+        var params = {
+          id: this.page.id
+        };
+        var body = {
+          name: this.pageTitle,
+          summary: {
+            text: this.pageSummary,
+            properties: this.pageProperties,
+          }
+        };
+        this.$.editPageSummaryAjax.params = params;
+        this.$.editPageSummaryAjax.body = body;
+        this.$.editPageSummaryAjax.generateRequest();
+      }
+
+      handleEditSummary() {
+        this.set('page.name', this.pageTitle);
+        this.set('page.summary.text', this.pageSummary);
+        this.set('page.summary.properties', this._copyJson(this.pageProperties));
+      }
+
+      // _prepareFinalProperties() {
+      //   finalProperties = [];
+      //   this.pageProperties.forEach(function(property) {
+      //     if (property.key) {
+      //       finalProperties.push(property);
+      //     }
+      //   });
+      //   return this._copyJson(finalProperties);
+      // }
+    }
+
+    window.customElements.define(SrEditSummaryCard.is, SrEditSummaryCard);
+  </script>
+</dom-module>

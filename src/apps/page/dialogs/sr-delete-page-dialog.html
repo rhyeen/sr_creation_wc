@@ -41,7 +41,11 @@
       }
 
       deletePage() {
-        this._deletePage();
+        var params = {
+          id: this.pageId
+        };
+        this.$.deletePageAjax.params = params;
+        this.$.deletePageAjax.generateRequest();
       }
 
       getDefaultPageView() {
@@ -50,14 +54,6 @@
 
       handleDeletePage() {
         window.location.href = window.location.origin + "/page";
-      }
-
-      _deletePage() {
-        var params = {
-          id: this.pageId
-        };
-        this.$.deletePageAjax.params = params;
-        this.$.deletePageAjax.generateRequest();
       }
     }
 

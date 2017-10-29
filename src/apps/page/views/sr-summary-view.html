@@ -1,4 +1,5 @@
 <link rel="import" href="../cards/sr-summary-card.html">
+<link rel="import" href="../cards/sr-edit-summary-card.html">
 <link rel="import" href="../cards/sr-add-page-card.html">
 <link rel="import" href="../cards/sr-related-pages-card.html">
 <link rel="import" href="../header-options/sr-summary-header-options.html">
@@ -31,7 +32,7 @@
                 page-confirmation-text="[[pageConfirmationText]]"></sr-summary-header-options>
           </app-toolbar>
         </app-header>
-        <template is="dom-if" if="[[!showAddPage]]">
+        <template is="dom-if" if="[[showSummaryCard]]">
           <sr-summary-card
               page="[[page]]"></sr-summary-card>
           <sr-related-pages-card
@@ -41,6 +42,10 @@
           <sr-add-page-card
               page="[[page]]"
               added-page="[[addedPage]]"></sr-add-page-card>
+        </template>
+        <template is="dom-if" if="[[showEditPageSummary]]">
+          <sr-edit-summary-card
+              page="[[page]]"></sr-edit-summary-card>
         </template>
       </app-header-layout>
     </app-drawer-layout>
@@ -86,6 +91,14 @@
             type: Boolean,
             value: false
           },
+          showSummaryCard: {
+            type: Boolean,
+            value: true
+          },
+          showEditPageSummary: {
+            type: Boolean,
+            value: false
+          },
           addedPage: {
             type: Object,
             value: {}
@@ -97,7 +110,9 @@
         super.ready();
         // @DEBUG: remove after finished testing adding new page
         // this._triggerAddPageChangeListener(null);
+        this._triggerEditPageSummaryListener();
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
+        this.addEventListener('add-related-page', e => this._triggerAddPageChangeListener(e));
         this.addEventListener('trigger-add-page', e => this._triggerAddPageChangeListener(e));
         this.addEventListener('trigger-delete-page', e => this._triggerDeletePageChangeListener(e));
         this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
@@ -108,6 +123,7 @@
         this.addEventListener('trigger-add-page-dialog-2', e => this._triggerAddPageDialogChangeListener(e, 2));
         this.addEventListener('review-adding-page', e => this._triggerReviewAddingPageListener(e));
         this.addEventListener('save-adding-page', e => this._triggerSaveAddingPageListener(e));
+        this.addEventListener('edit-summary', e => this._triggerEditPageSummaryListener(e));
       }
 
       _toggleDrawerChangeListener(event) {
@@ -135,6 +151,14 @@
         } else {
           console.error('Unexpected state: sr-summary-view.html._triggerPageConfirmationChangeListener()');
         }
+      }
+
+      _triggerEditPageSummaryListener(event) {
+        this._showEditPageSummary();
+        this.set('showBackButton', true);
+        this.set('pageConfirmationText', 'Save');
+        this.set('menuTitle', 'Edit Page Summary');
+        this.set('disableMenuConfirmation', false);
       }
 
       _saveAddedPage(addedPage) {
@@ -169,12 +193,30 @@
       }
 
       _triggerReviewAddingPageListener(event) {
-        this.set('showAddPage', true);
+        this._showAddPage();
         this.set('showBackButton', true);
         this.set('pageConfirmationText', 'Save');
         this.set('menuTitle', 'Add a Page');
         this.set('disableMenuConfirmation', false);
         this.set('addedPage', event.detail);
+      }
+
+      _showAddPage() {
+        this.set('showAddPage', true);
+        this.set('showSummaryCard', false);
+        this.set('showEditPageSummary', false);
+      }
+
+      _showSummaryCard() {
+        this.set('showAddPage', false);
+        this.set('showSummaryCard', true);
+        this.set('showEditPageSummary', false);
+      }
+
+      _showEditPageSummary() {
+        this.set('showAddPage', false);
+        this.set('showSummaryCard', false);
+        this.set('showEditPageSummary', true);
       }
 
       _triggerSaveAddingPageListener(event) {

@@ -6,38 +6,42 @@
     <paper-card>
       <app-toolbar>
         <div main-title>Related Pages</div>
-        <template is="dom-if" if="{{!reorderingPages}}">
+        <template is="dom-if" if="[[!reorderingPages]]">
           <paper-menu-button dynamic-align="true">
             <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
             <paper-listbox slot="dropdown-content">
-              <paper-icon-item name="page">
+              <paper-icon-item
+                  on-tap="addRelatedPage">
                 <iron-icon icon="sr-icons:page-add" slot="item-icon"></iron-icon>
                 Add a Related Page
               </paper-icon-item>
-              <paper-icon-item name="account" on-tap="reorderPages">
+              <paper-icon-item
+                  on-tap="reorderPages">
                 <iron-icon icon="sr-icons:reorder" slot="item-icon"></iron-icon>
                 Reorder Related Pages
               </paper-icon-item>
             </paper-listbox>
           </paper-menu-button>
         </template>
-        <template is="dom-if" if="{{reorderingPages}}">
+        <template is="dom-if" if="[[reorderingPages]]">
           <paper-icon-button icon="sr-icons:done" on-tap="confirmReorderPages"></paper-icon-button>
         </template>
       </app-toolbar>
       <div class="card-action-list">
         <template is="dom-repeat" items="{{page.pages}}">
-          <template is="dom-if" if="{{!reorderingPages}}">
-            <a class="route-link" href="{{baseRoute}}/related-pages/{{item.type}}" tabindex="-1">
+          <template is="dom-if" if="[[!reorderingPages]]">
+            <a class="route-link" href="[[baseRoute]]/related-pages/[[item.type]]" tabindex="-1">
               <paper-item>
-                <div class="title" id="{{getRelatedPageId(item)}}">[[getRelatedPageName(item)]]</div>
-                <paper-badge for="{{getRelatedPageId(item)}}" label="{{item.properties.list.length}}"></paper-badge>
+                <div class="title" id="[[getRelatedPageId(item)]]">[[getRelatedPageName(item)]]</div>
+                <paper-badge for="[[getRelatedPageId(item)]]" label="[[item.properties.list.length]]"></paper-badge>
               </paper-item>
             </a>
           </template>
-          <template is="dom-if" if="{{reorderingPages}}">
+          <template is="dom-if" if="[[reorderingPages]]">
             <paper-item>
-              <div class="title">[[getRelatedPageName(item)]]</div>
+              <paper-item-body>
+                <div class="title">[[getRelatedPageName(item)]]</div>
+              </paper-item-body>
               <paper-icon-button
                   icon="sr-icons:send-to-top"
                   on-tap="moveRelatedPageToTop"
@@ -100,12 +104,11 @@
         return window.location.origin + "/page/" + pageId;
       }
 
-      isLastElement(index, list) {
-        return index >= list.length - 1;
-      }
-
-      isFirstElement(index) {
-        return index <= 0;
+      addRelatedPage() {
+        this.dispatchEvent(new CustomEvent('add-related-page', {
+          bubbles: true,
+          composed: true,
+        }));
       }
 
       reorderPages() {
@@ -115,6 +118,14 @@
       confirmReorderPages() {
         this.set('reorderingPages', false);
         this._updatePageLinks();
+      }
+
+      isLastElement(index, list) {
+        return index >= list.length - 1;
+      }
+
+      isFirstElement(index) {
+        return index <= 0;
       }
 
       moveRelatedPageUp(event) {
