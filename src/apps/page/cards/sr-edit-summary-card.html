@@ -27,8 +27,7 @@
           <paper-menu-button dynamic-align="true">
             <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
             <paper-listbox slot="dropdown-content">
-              <paper-icon-item
-                  on-tap="addProperty">
+              <paper-icon-item on-tap="addProperty">
                 <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
                 Add Property
               </paper-icon-item>
@@ -47,7 +46,9 @@
       <div class="card-action-list">
         <template is="dom-repeat" items="{{pageProperties}}">
           <template is="dom-if" if="[[!reorderingProperties]]">
-            <paper-item on-tap="editProperty">
+            <paper-item
+                on-tap="editProperty"
+                value="[[index]]">
               <paper-item-body>
                 <div>
                   <span class="property-title">[[item.key]]:</span>
@@ -90,25 +91,10 @@
                   disabled="[[isLastElement(index, pageProperties)]]"></paper-icon-button>
             </paper-item>
           </template>
-        <!--   <div class="property">
-            <paper-input
-                label="Property Key"
-                value="{{item.key}}"
-                on-input="pagePropertyChanged"></paper-input>
-            <paper-input
-                label="Property Value"
-                value="{{item.value}}"
-                disabled="[[keyIsEmpty(item.key)]]"
-                on-input="pagePropertyChanged"></paper-input>
-          </div> -->
         </template>
-        <!-- <paper-icon-item>
-          <iron-icon icon="sr-icons:add-circle" slot="item-icon"></iron-icon>
-          Add a New Property
-        </paper-icon-item> -->
       </div>
       <div class="card-actions">
-        <paper-button>
+        <paper-button on-tap="addProperty">
           <iron-icon icon="sr-icons:add-circle"></iron-icon>
           Add Property
         </paper-button>
@@ -118,6 +104,7 @@
         id="editPageSummaryAjax"
         url="http://localhost:4000/user/page/summary"
         handle-as="json"
+        content-type="application/json"
         method="PUT"
         on-response="handleEditSummary"
         debounce-duration="300"></iron-ajax>
@@ -128,17 +115,24 @@
       
       static get properties() {
         return {
+          page: {
+            type: Object,
+            value: null,
+            notify: true
+          },
           pageSummary: {
-            text: String,
+            type: String,
             value: null,
           },
           pageTitle: {
-            text: String,
+            type: String,
             value: null,
           },
+          // exposed publically so that the edit property dialog can alter it directly, since it is a copy of the page's properties.
           pageProperties: {
-            text: Array,
+            type: Array,
             value: null,
+            notify: true,
           },
           reorderingProperties: {
             type: Boolean,
@@ -147,44 +141,9 @@
         };
       }
 
-      // static get observers() {
-      //   return [
-      //     '_pagePropertiesChanged(pageProperties)',
-      //   ];
-      // }
-
-      // keyIsEmpty(propertyKey) {
-      //   return !propertyKey;
-      // }
-
-      // _pagePropertiesChanged(pageProperties) {
-      //   this._ensureEmptyLastProperty(pageProperties);
-      // }
-
-      // pagePropertyChanged(event) {
-      //   this._ensureEmptyLastProperty(this.pageProperties);
-      // }
-
-      // _ensureEmptyLastProperty(pageProperties) {
-      //   if (!this._shouldAddEmptyProperty(pageProperties)) {
-      //     return;
-      //   }
-      //   if (!pageProperties) {
-      //     pageProperties = [];
-      //   }
-      //   pageProperties.push({
-      //     key: null,
-      //     value: null
-      //   });
-      //   this.set('pageProperties', pageProperties);
-      // }
-
-      // _shouldAddEmptyProperty(pageProperties) {
-      //   if (!pageProperties || pageProperties.length <= 0) {
-      //     return true;
-      //   }
-      //   var lastProperty = pageProperties[pageProperties.length - 1];
-      //   return (lastProperty.key !== null && lastProperty.key !== '') || (lastProperty.value !== null && lastProperty.value !== '');
+      // forceUpdatePageProperties() {
+      //   debugger;
+      //   this.set('pageProperties', this.pageProperties);
       // }
 
       ready() {
@@ -252,40 +211,53 @@
         if (event.target.localName === 'paper-icon-button') {
           return;
         }
-        console.log('@DEBUG');
+        var index = event.currentTarget.value;
+        this.dispatchEvent(new CustomEvent('edit-property', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            propertyIndex: index
+          }
+        }));
       }
 
-      editPageSummary() {
+      addProperty() {
+        this.dispatchEvent(new CustomEvent('edit-property', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            propertyIndex: null
+          }
+        }));
+      }
+
+      saveEditedPageSummary() {
         var params = {
           id: this.page.id
         };
-        var body = {
+        var body = JSON.stringify({
           name: this.pageTitle,
           summary: {
             text: this.pageSummary,
             properties: this.pageProperties,
           }
-        };
+        });
         this.$.editPageSummaryAjax.params = params;
         this.$.editPageSummaryAjax.body = body;
         this.$.editPageSummaryAjax.generateRequest();
       }
 
       handleEditSummary() {
-        this.set('page.name', this.pageTitle);
-        this.set('page.summary.text', this.pageSummary);
-        this.set('page.summary.properties', this._copyJson(this.pageProperties));
+        var newPage = this._copyJson(this.page);
+        newPage.name = this.pageTitle;
+        newPage.summary.text = this.pageSummary;
+        newPage.summary.properties = this._copyJson(this.pageProperties);
+        this.set('page', newPage);
+        this.dispatchEvent(new CustomEvent('close-edit-summary', {
+          bubbles: true,
+          composed: true
+        }));
       }
-
-      // _prepareFinalProperties() {
-      //   finalProperties = [];
-      //   this.pageProperties.forEach(function(property) {
-      //     if (property.key) {
-      //       finalProperties.push(property);
-      //     }
-      //   });
-      //   return this._copyJson(finalProperties);
-      // }
     }
 
     window.customElements.define(SrEditSummaryCard.is, SrEditSummaryCard);

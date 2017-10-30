@@ -6,6 +6,7 @@
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
 <link rel="import" href="../dialogs/sr-delete-page-dialog.html">
 <link rel="import" href="../dialogs/sr-add-page-dialog.html">
+<link rel="import" href="../dialogs/sr-edit-property-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
 
 <dom-module id="sr-summary-view">
@@ -45,7 +46,9 @@
         </template>
         <template is="dom-if" if="[[showEditPageSummary]]">
           <sr-edit-summary-card
-              page="[[page]]"></sr-edit-summary-card>
+              id="editSummaryCard"
+              page="{{page}}"
+              page-properties="{{editingProperties}}"></sr-edit-summary-card>
         </template>
       </app-header-layout>
     </app-drawer-layout>
@@ -56,6 +59,10 @@
         id="pageSearchDialog"></sr-page-search-dialog>
     <sr-delete-page-dialog
         id="deletePageDialog"></sr-delete-page-dialog>
+    <sr-edit-property-dialog
+        id="editPropertyDialog"
+        editing-properties="{{editingProperties}}"
+        editing-property-index="[[editingPropertyIndex]]"></sr-edit-property-dialog>
     <iron-ajax
         id="createPageAjax"
         url="http://localhost:4000/user/page"
@@ -102,7 +109,15 @@
           addedPage: {
             type: Object,
             value: {}
-          }
+          },
+          editingProperties: {
+            type: Array,
+            value: null
+          },
+          editingPropertyIndex: {
+            type: Number,
+            value: null
+          },
         };
       }
 
@@ -110,7 +125,7 @@
         super.ready();
         // @DEBUG: remove after finished testing adding new page
         // this._triggerAddPageChangeListener(null);
-        this._triggerEditPageSummaryListener();
+        // this._triggerEditPageSummaryListener();
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
         this.addEventListener('add-related-page', e => this._triggerAddPageChangeListener(e));
         this.addEventListener('trigger-add-page', e => this._triggerAddPageChangeListener(e));
@@ -124,10 +139,18 @@
         this.addEventListener('review-adding-page', e => this._triggerReviewAddingPageListener(e));
         this.addEventListener('save-adding-page', e => this._triggerSaveAddingPageListener(e));
         this.addEventListener('edit-summary', e => this._triggerEditPageSummaryListener(e));
+        this.addEventListener('edit-property', e => this._triggerEditPropertyListener(e));
+        this.addEventListener('close-edit-summary', e => this._triggerCloseEditPageSummaryListener(e));
+
       }
 
       _toggleDrawerChangeListener(event) {
         this.$.drawer.toggle();
+      }
+
+      _triggerEditPropertyListener(event) {
+        this.set('editingPropertyIndex', event.detail.propertyIndex);
+        this.$.editPropertyDialog.toggle();
       }
 
       _triggerAddPageChangeListener(event) {
@@ -148,8 +171,10 @@
       _triggerPageConfirmationChangeListener(event) {
         if (this.showAddPage) {
           this._saveAddedPage(this.addedPage);
+        } else if (this.showEditPageSummary) {
+          this.shadowRoot.querySelector("#editSummaryCard").saveEditedPageSummary();
         } else {
-          console.error('Unexpected state: sr-summary-view.html._triggerPageConfirmationChangeListener()');
+          console.error('Unexpected state');
         }
       }
 
@@ -158,6 +183,18 @@
         this.set('showBackButton', true);
         this.set('pageConfirmationText', 'Save');
         this.set('menuTitle', 'Edit Page Summary');
+        this.set('disableMenuConfirmation', false);
+      }
+
+      _triggerCloseEditPageSummaryListener(event) {
+        this._setSummaryCardView();
+      }
+
+      _setSummaryCardView() {
+        this._showSummaryCard();
+        this.set('showBackButton', false);
+        this.set('pageConfirmationText', null);
+        this.set('menuTitle', 'Page Summary');
         this.set('disableMenuConfirmation', false);
       }
 

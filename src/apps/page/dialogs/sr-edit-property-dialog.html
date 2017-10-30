@@ -1,0 +1,109 @@
+<dom-module id="sr-edit-property-dialog">
+  <template>
+    <style include="shared-styles">
+      paper-dialog {
+        min-width: 350px;
+      }
+    </style>
+    <paper-dialog id="internalEditPropertyDialog" modal>
+      <h2>Edit Property</h2>
+      <paper-dialog-scrollable>
+        <paper-input
+            label="Property Label"
+            value="{{internalProperty.key}}"></paper-input>
+        <paper-input
+            label="Property Value"
+            value="{{internalProperty.value}}"
+            disabled="[[keyIsEmpty(internalProperty.key)]]"></paper-input>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button
+            class="btn-primary"
+            raised dialog-confirm autofocus
+            on-tap="confirm"
+            disabled="[[invalidProperty(internalProperty.key, internalProperty.value)]]">Confirm</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    class SrEditPropertyDialog extends Polymer.Element {
+      static get is() { return 'sr-edit-property-dialog'; }
+      
+      static get properties() {
+        return {
+          internalProperty: {
+            type: Object,
+            value: {},
+          },
+          editingProperties: {
+            type: Object,
+            value: {},
+            notify: true
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_editingPropertyIndexChanged(editingPropertyIndex)',
+          '_editingPropertiesChanged(editingProperties)',
+        ];
+      }
+
+      _editingPropertiesChanged(editingProperties) {
+        this._propertyChanged(this.editingPropertyIndex);
+      }
+
+      _editingPropertyIndexChanged(editingPropertyIndex) {
+        this._propertyChanged(editingPropertyIndex);
+      }
+
+      _propertyChanged(editingPropertyIndex) {
+        // new property
+        if (editingPropertyIndex === null) { 
+          return this.set('internalProperty', {
+            key: null,
+            value: null
+          });
+        }
+        this.set('internalProperty', {
+          key: this.editingProperties[editingPropertyIndex].key,
+          value: this.editingProperties[editingPropertyIndex].value
+        });
+      }
+
+      toggle() {
+        this.$.internalEditPropertyDialog.toggle();
+      }
+
+      confirm() {
+        var newProperties = this._copyJson(this.editingProperties);
+        var newProperty = {
+          key: this.internalProperty.key,
+          value: this.internalProperty.value
+        };
+        if (this.editingPropertyIndex !== null) {
+          newProperties[this.editingPropertyIndex] = newProperty;
+        } else {
+          newProperties.push(newProperty);
+        }
+        this.set('editingProperties', newProperties);
+      }
+
+      _copyJson(jsonObject) {
+        return JSON.parse(JSON.stringify(jsonObject));
+      }
+
+      keyIsEmpty(key) {
+        return !key;
+      }
+
+      invalidProperty(key, value) {
+        return !key || !value;
+      }
+    }
+
+    window.customElements.define(SrEditPropertyDialog.is, SrEditPropertyDialog);
+  </script>
+</dom-module>
