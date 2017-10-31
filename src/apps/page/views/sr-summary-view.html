@@ -26,10 +26,10 @@
           <app-toolbar>
             <menu-back-button
                 show-back-button="[[showBackButton]]"
-                disabled="[[disableMenuConfirmation]]"></menu-back-button>
+                disabled="[[disableMenuBackButton]]"></menu-back-button>
             <div main-title>[[menuTitle]]</div>
             <sr-summary-header-options
-                disabled="[[disableMenuConfirmation]]"
+                disabled="[[disableHeaderOptions]]"
                 page-confirmation-text="[[pageConfirmationText]]"></sr-summary-header-options>
           </app-toolbar>
         </app-header>
@@ -48,6 +48,7 @@
           <sr-edit-summary-card
               id="editSummaryCard"
               page="{{page}}"
+              page-title="{{editingTitle}}"
               page-properties="{{editingProperties}}"></sr-edit-summary-card>
         </template>
       </app-header-layout>
@@ -85,7 +86,11 @@
             type: String,
             value: null
           },
-          disableMenuConfirmation: {
+          disableHeaderOptions: {
+            type: Boolean,
+            value: false
+          },
+          disableMenuBackButton: {
             type: Boolean,
             value: false
           },
@@ -118,7 +123,21 @@
             type: Number,
             value: null
           },
+          editingTitle: {
+            type: String,
+            value: null
+          }
         };
+      }
+
+      static get observers() {
+        return [
+          '_editingTitleChanged(editingTitle)',
+        ];
+      }
+
+      _editingTitleChanged(editingTitle) {
+        this.set('disableHeaderOptions', !editingTitle);
       }
 
       ready() {
@@ -141,7 +160,6 @@
         this.addEventListener('edit-summary', e => this._triggerEditPageSummaryListener(e));
         this.addEventListener('edit-property', e => this._triggerEditPropertyListener(e));
         this.addEventListener('close-edit-summary', e => this._triggerCloseEditPageSummaryListener(e));
-
       }
 
       _toggleDrawerChangeListener(event) {
@@ -183,7 +201,8 @@
         this.set('showBackButton', true);
         this.set('pageConfirmationText', 'Save');
         this.set('menuTitle', 'Edit Page Summary');
-        this.set('disableMenuConfirmation', false);
+        this.set('disableHeaderOptions', false);
+        this.set('disableMenuBackButton', false);
       }
 
       _triggerCloseEditPageSummaryListener(event) {
@@ -195,7 +214,8 @@
         this.set('showBackButton', false);
         this.set('pageConfirmationText', null);
         this.set('menuTitle', 'Page Summary');
-        this.set('disableMenuConfirmation', false);
+        this.set('disableHeaderOptions', false);
+        this.set('disableMenuBackButton', false);
       }
 
       _saveAddedPage(addedPage) {
@@ -234,7 +254,8 @@
         this.set('showBackButton', true);
         this.set('pageConfirmationText', 'Save');
         this.set('menuTitle', 'Add a Page');
-        this.set('disableMenuConfirmation', false);
+        this.set('disableHeaderOptions', false);
+        this.set('disableMenuBackButton', false);
         this.set('addedPage', event.detail);
       }
 
