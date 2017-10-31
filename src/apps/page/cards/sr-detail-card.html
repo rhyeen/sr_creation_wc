@@ -10,7 +10,7 @@
           <paper-menu-button dynamic-align="true">
             <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
             <paper-listbox slot="dropdown-content">
-              <paper-icon-item>
+              <paper-icon-item on-tap="editDetail">
                 <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
                 Edit Detail
               </paper-icon-item>
@@ -73,6 +73,16 @@
 
       getTargetSummary() {
         return 'detailSummary' + this.contextIndex;
+      }
+
+      editDetail() {
+        this.dispatchEvent(new CustomEvent('trigger-edit-detail', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            detailIndex: this.contextIndex
+          }
+        }));
       }
     }
 

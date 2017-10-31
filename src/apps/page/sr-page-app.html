@@ -13,28 +13,30 @@
         pattern="/:pageId/:context"
         data="{{routeData}}"
         tail="{{subRoute}}"></app-route>
-    <iron-pages
-        selected="[[routeData.context]]"
-        attr-for-selected="name"
-        fallback-selection="summary"
-        role="main">
-      <sr-summary-view
-          class="view-container"
-          name="summary"
-          page="[[page]]"></sr-summary-view>
-      <sr-related-pages-app
-          name="related-pages"
-          page="[[page]]"
-          route="{{subRoute}}"></sr-related-pages-app>
-      <sr-details-view
-          class="view-container"
-          name="detail"
-          page="[[page]]"></sr-details-view>
-      <sr-images-view
-          class="view-container"
-          name="image"
-          page="[[page]]"></sr-images-view>
-    </iron-pages>
+    <template is="dom-if" if="[[page]]">
+      <iron-pages
+          selected="[[routeData.context]]"
+          attr-for-selected="name"
+          fallback-selection="summary"
+          role="main">
+        <sr-summary-view
+            class="view-container"
+            name="summary"
+            page="[[page]]"></sr-summary-view>
+        <sr-related-pages-app
+            name="related-pages"
+            page="[[page]]"
+            route="{{subRoute}}"></sr-related-pages-app>
+        <sr-details-view
+            class="view-container"
+            name="detail"
+            page="[[page]]"></sr-details-view>
+        <sr-images-view
+            class="view-container"
+            name="image"
+            page="[[page]]"></sr-images-view>
+      </iron-pages>
+    </template>
     <iron-ajax
         id="getPageAjax"
         url="http://localhost:4000/user/page"

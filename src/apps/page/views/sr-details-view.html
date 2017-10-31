@@ -1,4 +1,5 @@
 <link rel="import" href="../cards/sr-detail-card.html">
+<link rel="import" href="../cards/sr-edit-detail-card.html">
 <link rel="import" href="../header-options/sr-details-header-options.html">
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
@@ -20,20 +21,29 @@
           <app-toolbar>
             <menu-back-button
                 show-back-button="[[showBackButton]]"
-                disabled="[[disableMenuConfirmation]]"></menu-back-button>
+                disabled="[[disableMenuBackButton]]"></menu-back-button>
             <div main-title>[[menuTitle]]</div>
             <sr-details-header-options
-                disabled="[[disableMenuConfirmation]]"
-               page-confirmation-text="[[pageConfirmationText]]"></sr-details-header-options>
+                disabled="[[disableHeaderOptions]]"
+                page-confirmation-text="[[pageConfirmationText]]"></sr-details-header-options>
           </app-toolbar>
         </app-header>
-        <template is="dom-repeat" items="{{page.details.list}}">
-          <sr-detail-card
-              context-item="[[item]]"
-              context-index="[[index]]"></sr-detail-card>
+        <template is="dom-if" if="[[showDetailCard]]">
+          <template is="dom-repeat" items="{{page.details.list}}">
+            <sr-detail-card
+                context-item="[[item]]"
+                context-index="[[index]]"></sr-detail-card>
+          </template>
+          <template is="dom-if" if="[[!hasDetailsList]]">
+            <sr-detail-card></sr-detail-card>
+          </template>
         </template>
-        <template is="dom-if" if="{{!hasDetailsList}}">
-          <sr-detail-card></sr-detail-card>
+        <template is="dom-if" if="[[showEditDetail]]">
+          <sr-edit-detail-card
+              id="editDetailCard"
+              page="{{page}}"
+              editing-detail="{{editingDetail}}"
+              editing-detail-index="[[editingDetailIndex]]"></sr-edit-detail-card>
         </template>
       </app-header-layout>
     </app-drawer-layout>
@@ -54,23 +64,47 @@
             type: String,
             value: null
           },
-          disableMenuConfirmation: {
+          disableHeaderOptions: {
             type: Boolean,
             value: false
           },
-          showBackButton: {
+          disableMenuBackButton: {
+            type: Boolean,
+            value: false
+          },
+          hasDetailsList: Boolean,
+          showEditDetail: {
+            type: Boolean,
+            value: false,
+          },
+          showDetailCard: {
             type: Boolean,
             value: true,
-            notify: true
           },
-          hasDetailsList: Boolean
+          showBackButton: {
+            type: Boolean,
+            value: true
+          },
+          editingDetail: {
+            type: Object,
+            value: null
+          },
+          editingDetailIndex: {
+            type: Number,
+            value: null
+          }
         };
       }
 
       static get observers() {
         return [
           '_pageIdChanged(page.id)',
+          '_editingDetailNameChanged(editingDetail.name)',
         ];
+      }
+
+      _editingDetailNameChanged(editingDetailName) {
+        this.set('disableHeaderOptions', !editingDetailName);
       }
 
       _pageIdChanged(pageId) {
@@ -86,11 +120,15 @@
 
       ready() {
         super.ready();
+        // @DEBUG: remove once done testing
+        this._triggerAddDetailChangeListener(null);
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
         this.addEventListener('trigger-add-detail', e => this._triggerAddDetailChangeListener(e));
+        this.addEventListener('trigger-edit-detail', e => this._triggerEditDetailChangeListener(e));
         this.addEventListener('trigger-reorder-details', e => this._triggerReorderDetailsChangeListener(e));
         this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
         this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
+        this.addEventListener('close-edit-detail', e => this._triggerCloseEditDetailListener(e));
       }
 
       _toggleDrawerChangeListener(event) {
@@ -98,7 +136,44 @@
       }
 
       _triggerAddDetailChangeListener(event) {
+        this._showEditDetail();
+        this.set('pageConfirmationText', 'Save');
+        this.set('menuTitle', 'Add Detail');
+        this.set('disableHeaderOptions', false);
+        this.set('disableMenuBackButton', false);
+        this.set('editingDetailIndex', null);
+      }
 
+      _triggerEditDetailChangeListener(event) {
+        this._showEditDetail();
+        this.set('pageConfirmationText', 'Save');
+        this.set('menuTitle', 'Edit Detail');
+        this.set('disableHeaderOptions', false);
+        this.set('disableMenuBackButton', false);
+        this.set('editingDetailIndex', event.detail.detailIndex);
+      }
+
+      _triggerCloseEditDetailListener(event) {
+        this._setDetailCardView();
+      }
+
+      _setDetailCardView() {
+        this._showDetailCard();
+        this.set('showBackButton', true);
+        this.set('pageConfirmationText', null);
+        this.set('menuTitle', 'Details');
+        this.set('disableHeaderOptions', false);
+        this.set('disableMenuBackButton', false);
+      }
+
+      _showEditDetail() {
+        this.set('showEditDetail', true);
+        this.set('showDetailCard', false);
+      }
+
+      _showDetailCard() {
+        this.set('showEditDetail', false);
+        this.set('showDetailCard', true);
       }
 
       _triggerReorderDetailsChangeListener(event) {
@@ -106,7 +181,11 @@
       }
 
       _triggerPageConfirmationChangeListener(event) {
-        
+        if (this.showEditDetail) {
+          this.shadowRoot.querySelector("#editDetailCard").saveDetail();
+        } else {
+          console.error('Unexpected state');
+        }
       }
 
       _triggerSearchChangeListener(event) {

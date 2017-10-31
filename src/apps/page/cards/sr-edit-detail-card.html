@@ -1,0 +1,221 @@
+<dom-module id="sr-edit-detail-card">
+  <template>
+    <style include="shared-styles">
+      paper-tabs {
+        --paper-tabs-selection-bar-color: var(--google-grey-700);
+      }
+
+      paper-tab {
+        --paper-tab-ink: var(--google-grey-700);
+      }
+
+      .missing-partitions {
+        text-align: center;
+        color: var(--app-primary-color);
+      }
+
+      .preview-tab-content {
+        margin: 40px 0px;
+        display: flex;
+        justify-content: center;
+      }
+
+    </style>
+    <paper-card>
+      <div class="card-content">
+        <paper-input
+            label="Detail Name"
+            value="{{editingDetail.name}}"></paper-input>
+      </div>
+    </paper-card>
+    <paper-card>
+      <paper-tabs
+          selected="{{detailEditorTabSelection}}">
+          <paper-tab>Editor</paper-tab>
+          <paper-tab>Preview</paper-tab>
+      </paper-tabs>
+      <div class="card-content">
+        <template is="dom-if" if="[[isDetailEditorSelected(detailEditorTabSelection)]]">
+          <paper-textarea
+              label="Detail Content"
+              value="{{editingDetail.content.mark_down}}"></paper-textarea>
+        </template>
+        <template is="dom-if" if="[[isDetailPreviewSelected(detailEditorTabSelection)]]">
+          <div class="preview-tab-content">
+            <paper-spinner-lite active="[[isRenderingPartitions]]"></paper-spinner-lite>
+            <template is="dom-if" if="[[hasNoPartitions(editingDetail.content.partitions)]]">
+              <div class="missing-partitions">
+                No detail content to preview
+              </div>
+            </template>
+            <template is="dom-if" if="[[hasPartitions(editingDetail.content.partitions)]]">
+              <rendered-markdown
+                  partitions="{{editingDetail.content.partitions}}"></rendered-markdown>
+            </template>
+          </div>
+        </template>
+      </div>
+    </paper-card>
+    <iron-ajax
+        id="editPageDetailAjax"
+        url="http://localhost:4000/user/page/detail"
+        handle-as="json"
+        content-type="application/json"
+        method="PUT"
+        on-response="handleEditDetail"
+        debounce-duration="300"></iron-ajax>
+    <iron-ajax
+        id="addPageDetailAjax"
+        url="http://localhost:4000/user/page/detail"
+        handle-as="json"
+        content-type="application/json"
+        method="POST"
+        on-response="handleAddDetail"
+        debounce-duration="300"></iron-ajax>
+    <iron-ajax
+        id="renderTagsAjax"
+        url="http://localhost:4000/user/page/detail"
+        handle-as="json"
+        content-type="application/json"
+        method="POST"
+        on-response="handleAddDetail"
+        debounce-duration="300"></iron-ajax>
+  </template>
+  <script>
+    class SrEditDetailCard extends Polymer.Element {
+      static get is() { return 'sr-edit-detail-card'; }
+      
+      static get properties() {
+        return {
+          page: {
+            type: Object,
+            value: null,
+            notify: true
+          },
+          editingDetail: {
+            type: Object,
+            value: null,
+            notify: true,
+          },
+          detailEditorTabSelection: {
+            type: Number,
+            value: 0,
+          },
+          isRenderingPartitions: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_detailEditorTabSelectionChanged(detailEditorTabSelection)',
+        ];
+      }
+
+      _detailEditorTabSelectionChanged(detailEditorTabSelection) {
+        if (this.isDetailPreviewSelected(detailEditorTabSelection)) {
+          this.set('isRenderingPartitions', true);
+        }
+      }
+
+      ready() {
+        super.ready();
+        // we want to copy it over so that if the user cancels, we don't overwrite what was previously there.
+        // we will update the detail's values at handleEditDetail()
+        var detail = this._getDetail(this.page, this.editingDetailIndex);
+        this.set('editingDetail', this._copyJson(detail));
+      }
+
+      isDetailEditorSelected(detailEditorTabSelection) {
+        return detailEditorTabSelection === 0;
+      }
+
+      isDetailPreviewSelected(detailEditorTabSelection) {
+        return detailEditorTabSelection === 1;
+      }
+
+      hasPartitions(partitions) {
+        return !!partitions && partitions.length > 0 && !this.isRenderingPartitions;
+      }
+
+      hasNoPartitions(partitions) {
+        return !this.hasPartitions(partitions) && !this.isRenderingPartitions;
+      }
+
+      _getDetail(page, detailIndex) {
+        if (detailIndex === null) {
+          return this._getNewDetail();
+        }
+        return page.details.list[detailIndex];
+      }
+
+      _getNewDetail() {
+        return {
+          name: null,
+          content: {
+            mark_down: null,
+            partitions: []
+          }
+        };
+      }
+
+      _setDetail(page, detailIndex, detail) {
+        if (detailIndex === null) {
+          page.details.list.push(detail);
+        }
+        page.details.list[detailIndex] = detail;
+      }
+
+      _copyJson(jsonObject) {
+        return JSON.parse(JSON.stringify(jsonObject));
+      }
+
+      saveDetail() {
+        if (this.editingDetailIndex === null) {
+          this._addDetail();
+        } else {
+          this._editDetail();
+        }
+      }
+
+      _addDetail() {
+        var params = {
+          id: this.page.id
+        };
+        var body = JSON.stringify(this.editingDetail);
+        this.$.addPageDetailAjax.params = params;
+        this.$.addPageDetailAjax.body = body;
+        this.$.addPageDetailAjax.generateRequest();
+      }
+
+      _editDetail() {
+        var params = {
+          id: this.page.id,
+          detail: this.editingDetail.id
+        };
+        var body = JSON.stringify(this.editingDetail);
+        this.$.editPageDetailAjax.params = params;
+        this.$.editPageDetailAjax.body = body;
+        this.$.editPageDetailAjax.generateRequest();
+      }
+
+      handleEditDetail() {
+        var newPage = this._copyJson(this.page);
+        this._setDetail(newPage, this.editingDetailIndex, this.editingDetail);
+        this.set('page', newPage);
+        this.dispatchEvent(new CustomEvent('close-edit-detail', {
+          bubbles: true,
+          composed: true
+        }));
+      }
+
+      handleAddDetail() {
+        this.handleEditDetail();
+      }
+    }
+
+    window.customElements.define(SrEditDetailCard.is, SrEditDetailCard);
+  </script>
+</dom-module>
