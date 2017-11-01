@@ -21,6 +21,9 @@
       <template is="dom-if" if="{{isTag(item)}}">
         <a href="{{getTagUrl(item)}}" target="_blank">{{item.text}}</a>
       </template>
+      <template is="dom-if" if="{{isBreak(item)}}">
+        <br>
+      </template>
     </template>
   </template>
   <script>
@@ -32,12 +35,27 @@
         };
       }
 
+      // static get observers() {
+      //   return [
+      //     '_partitionsChanged(partitions)',
+      //   ];
+      // }
+
+      // _partitionsChanged(partitions) {
+      //   debugger;
+      // }
+
+
       isText(item) {
         return item.type == "text";
       }
 
       isTag(item) {
         return item.type == "tag";
+      }
+
+      isBreak(item) {
+        return item.type == "break";
       }
 
       getTagUrl(item) {

@@ -15,9 +15,16 @@
       }
 
       .preview-tab-content {
-        margin: 40px 0px;
+        margin: 30px 2px;
+      }
+
+      .spinner-container {
         display: flex;
         justify-content: center;
+      }
+
+      paper-spinner-lite {
+        position: absolute;
       }
 
     </style>
@@ -42,7 +49,9 @@
         </template>
         <template is="dom-if" if="[[isDetailPreviewSelected(detailEditorTabSelection)]]">
           <div class="preview-tab-content">
-            <paper-spinner-lite active="[[isRenderingPartitions]]"></paper-spinner-lite>
+            <div class="spinner-container">
+              <paper-spinner-lite active="[[isRenderingPartitions]]"></paper-spinner-lite>
+            </div>
             <template is="dom-if" if="[[hasNoPartitions(editingDetail.content.partitions)]]">
               <div class="missing-partitions">
                 No detail content to preview
@@ -74,11 +83,11 @@
         debounce-duration="300"></iron-ajax>
     <iron-ajax
         id="renderTagsAjax"
-        url="http://localhost:4000/user/page/detail"
+        url="http://localhost:4000/user/tag/render"
         handle-as="json"
         content-type="application/json"
         method="POST"
-        on-response="handleAddDetail"
+        on-response="handleRenderTags"
         debounce-duration="300"></iron-ajax>
   </template>
   <script>
@@ -116,7 +125,13 @@
 
       _detailEditorTabSelectionChanged(detailEditorTabSelection) {
         if (this.isDetailPreviewSelected(detailEditorTabSelection)) {
+          if (!this.editingDetail.content.mark_down) {
+            this.editingDetail.content.partitions = [];
+            this.notifyPath('this.editingDetail.content.partitions');
+            return;
+          }
           this.set('isRenderingPartitions', true);
+          this._renderTags();
         }
       }
 
@@ -144,6 +159,28 @@
         return !this.hasPartitions(partitions) && !this.isRenderingPartitions;
       }
 
+      _renderTags() {
+        var params = {};
+        var body = {
+          mark_down: this.editingDetail.content.mark_down
+        };
+        if (!body) {
+          this.set('isRenderingPartitions', false);
+          return;
+        }
+        this.$.renderTagsAjax.params = params;
+        this.$.renderTagsAjax.body = body;
+        this.$.renderTagsAjax.generateRequest();
+      }
+
+      handleRenderTags(event) {
+        this.set('isRenderingPartitions', false);
+        this.editingDetail.content = event.detail.response;
+        this.notifyPath('editingDetail.content');
+        this.notifyPath('editingDetail.content.mark_down');
+        this.notifyPath('editingDetail.content.partitions');
+      }
+
       _getDetail(page, detailIndex) {
         if (detailIndex === null) {
           return this._getNewDetail();
@@ -161,11 +198,15 @@
         };
       }
 
-      _setDetail(page, detailIndex, detail) {
+      _setDetail() {
+        var detailIndex = this.editingDetailIndex;
         if (detailIndex === null) {
-          page.details.list.push(detail);
+          this.page.details.list.push(this.editingDetail);
+          this.notifyPath('page.details.list');
+        } else {
+          this.page.details.list[detailIndex] = this.editingDetail;
+          this.notifyPath('page.details.list[detailIndex]');
         }
-        page.details.list[detailIndex] = detail;
       }
 
       _copyJson(jsonObject) {
@@ -202,9 +243,7 @@
       }
 
       handleEditDetail() {
-        var newPage = this._copyJson(this.page);
-        this._setDetail(newPage, this.editingDetailIndex, this.editingDetail);
-        this.set('page', newPage);
+        this._setDetail();
         this.dispatchEvent(new CustomEvent('close-edit-detail', {
           bubbles: true,
           composed: true
