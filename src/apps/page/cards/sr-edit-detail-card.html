@@ -28,43 +28,45 @@
       }
 
     </style>
-    <paper-card>
-      <div class="card-content">
-        <paper-input
-            label="Detail Name"
-            value="{{editingDetail.name}}"></paper-input>
-      </div>
-    </paper-card>
-    <paper-card>
-      <paper-tabs
-          selected="{{detailEditorTabSelection}}">
-          <paper-tab>Editor</paper-tab>
-          <paper-tab>Preview</paper-tab>
-      </paper-tabs>
-      <div class="card-content">
-        <template is="dom-if" if="[[isDetailEditorSelected(detailEditorTabSelection)]]">
-          <paper-textarea
-              label="Detail Content"
-              value="{{editingDetail.content.mark_down}}"></paper-textarea>
-        </template>
-        <template is="dom-if" if="[[isDetailPreviewSelected(detailEditorTabSelection)]]">
-          <div class="preview-tab-content">
-            <div class="spinner-container">
-              <paper-spinner-lite active="[[isRenderingPartitions]]"></paper-spinner-lite>
-            </div>
-            <template is="dom-if" if="[[hasNoPartitions(editingDetail.content.partitions)]]">
-              <div class="missing-partitions">
-                No detail content to preview
+    <template is="dom-if" if="[[show]]">
+      <paper-card>
+        <div class="card-content">
+          <paper-input
+              label="Detail Name"
+              value="{{editingDetail.name}}"></paper-input>
+        </div>
+      </paper-card>
+      <paper-card>
+        <paper-tabs
+            selected="{{detailEditorTabSelection}}">
+            <paper-tab>Editor</paper-tab>
+            <paper-tab>Preview</paper-tab>
+        </paper-tabs>
+        <div class="card-content">
+          <template is="dom-if" if="[[isDetailEditorSelected(detailEditorTabSelection)]]">
+            <paper-textarea
+                label="Detail Content"
+                value="{{editingDetail.content.mark_down}}"></paper-textarea>
+          </template>
+          <template is="dom-if" if="[[isDetailPreviewSelected(detailEditorTabSelection)]]">
+            <div class="preview-tab-content">
+              <div class="spinner-container">
+                <paper-spinner-lite active="[[isRenderingPartitions]]"></paper-spinner-lite>
               </div>
-            </template>
-            <template is="dom-if" if="[[hasPartitions(editingDetail.content.partitions)]]">
-              <rendered-markdown
-                  partitions="{{editingDetail.content.partitions}}"></rendered-markdown>
-            </template>
-          </div>
-        </template>
-      </div>
-    </paper-card>
+              <template is="dom-if" if="[[hasNoPartitions(editingDetail.content.partitions)]]">
+                <div class="missing-partitions">
+                  No detail content to preview
+                </div>
+              </template>
+              <template is="dom-if" if="[[hasPartitions(editingDetail.content.partitions)]]">
+                <rendered-markdown
+                    partitions="{{editingDetail.content.partitions}}"></rendered-markdown>
+              </template>
+            </div>
+          </template>
+        </div>
+      </paper-card>
+    </template>
     <iron-ajax
         id="editPageDetailAjax"
         url="http://localhost:4000/user/page/detail"
@@ -120,7 +122,30 @@
       static get observers() {
         return [
           '_detailEditorTabSelectionChanged(detailEditorTabSelection)',
+          '_showChanged(show)',
+          '_editingDetailIndexChanged(editingDetailIndex)',
         ];
+      }
+
+      // The reason that we call setEditingDetail from _showChanged and _editingDetailIndexChanged is that we do not have one definitive way to guarantee way are ready to reload the view.
+      // For example, if show = true, but editingDetailIndex hasn't yet been updated, we'll pull in the previous detail (or null)
+      // We cannot rely on editingDetailIndex alone since it may not change (e.g. the user creates two new details: editingDetailIndex remains null) and so never triggers _editingDetailIndexChanged
+      _showChanged(show) {
+        this.setEditingDetail(this.editingDetailIndex);
+      }
+
+      _editingDetailIndexChanged(editingDetailIndex) {
+        this.setEditingDetail(editingDetailIndex);
+      }
+
+      /**
+       * Called to reset editingDetail once the view is loaded.
+       */
+      setEditingDetail(editingDetailIndex) {
+        // we want to copy it over so that if the user cancels, we don't overwrite what was previously there.
+        // we will update the actual detail's values at handleEditDetail()
+        var detail = this._getDetail(this.page, this.editingDetailIndex);
+        this.set('editingDetail', this._copyJson(detail));
       }
 
       _detailEditorTabSelectionChanged(detailEditorTabSelection) {
@@ -133,14 +158,6 @@
           this.set('isRenderingPartitions', true);
           this._renderTags();
         }
-      }
-
-      ready() {
-        super.ready();
-        // we want to copy it over so that if the user cancels, we don't overwrite what was previously there.
-        // we will update the detail's values at handleEditDetail()
-        var detail = this._getDetail(this.page, this.editingDetailIndex);
-        this.set('editingDetail', this._copyJson(detail));
       }
 
       isDetailEditorSelected(detailEditorTabSelection) {

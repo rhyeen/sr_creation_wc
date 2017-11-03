@@ -38,13 +38,12 @@
             <sr-detail-card></sr-detail-card>
           </template>
         </template>
-        <template is="dom-if" if="[[showEditDetail]]">
-          <sr-edit-detail-card
-              id="editDetailCard"
-              page="{{page}}"
-              editing-detail="{{editingDetail}}"
-              editing-detail-index="[[editingDetailIndex]]"></sr-edit-detail-card>
-        </template>
+        <sr-edit-detail-card
+            id="editDetailCard"
+            page="{{page}}"
+            show="[[showEditDetail]]"
+            editing-detail="{{editingDetail}}"
+            editing-detail-index="[[editingDetailIndex]]"></sr-edit-detail-card>
       </app-header-layout>
     </app-drawer-layout>
     <sr-page-search-dialog
