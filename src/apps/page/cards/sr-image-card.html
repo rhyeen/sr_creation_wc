@@ -7,7 +7,9 @@
         <app-toolbar>
           <div main-title>{{contextItem.name}}</div>
           <paper-icon-button icon="sr-icons:expand-more" on-tap="toggleExpand"></paper-icon-button>
-          <paper-menu-button dynamic-align="true">
+          <paper-menu-button
+              dynamic-align="true"
+              close-on-activate>
             <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
             <paper-listbox slot="dropdown-content">
               <paper-icon-item>

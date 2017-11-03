@@ -19,7 +19,9 @@
     <paper-card>
       <app-toolbar>
         <div main-title>[[page.name]]</div>
-        <paper-menu-button dynamic-align="true">
+          <paper-menu-button
+              dynamic-align="true"
+              close-on-activate>
           <paper-icon-button icon="sr-icons:more-vert" slot="dropdown-trigger"></paper-icon-button>
           <paper-listbox slot="dropdown-content">
             <paper-icon-item on-tap="editSummary">
