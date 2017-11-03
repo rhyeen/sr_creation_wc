@@ -15,13 +15,13 @@
       }
     </style>
     <template is="dom-repeat" items={{partitions}}>
-      <template is="dom-if" if="{{isText(item)}}">
+      <template is="dom-if" if="[[isText(item)]]">
         <span>{{item.text}}</span>
       </template>
-      <template is="dom-if" if="{{isTag(item)}}">
-        <a href="{{getTagUrl(item)}}" target="_blank">{{item.text}}</a>
+      <template is="dom-if" if="[[isTag(item)]]">
+        <a href="[[getTagUrl(item)]]" target="_blank">[[item.text]]</a>
       </template>
-      <template is="dom-if" if="{{isBreak(item)}}">
+      <template is="dom-if" if="[[isBreak(item)]]">
         <br>
       </template>
     </template>
@@ -35,15 +35,15 @@
         };
       }
 
-      // static get observers() {
-      //   return [
-      //     '_partitionsChanged(partitions)',
-      //   ];
-      // }
+      static get observers() {
+        return [
+          '_partitionsChanged(partitions)',
+        ];
+      }
 
-      // _partitionsChanged(partitions) {
-      //   debugger;
-      // }
+      _partitionsChanged(partitions) {
+        // debugger;
+      }
 
 
       isText(item) {

@@ -14,7 +14,7 @@
                 <iron-icon icon="sr-icons:edit" slot="item-icon"></iron-icon>
                 Edit Detail
               </paper-icon-item>
-              <paper-icon-item>
+              <paper-icon-item on-tap="deleteDetail">
                 <iron-icon icon="sr-icons:delete" slot="item-icon"></iron-icon>
                 Delete Detail
               </paper-icon-item>
@@ -77,6 +77,16 @@
 
       editDetail() {
         this.dispatchEvent(new CustomEvent('trigger-edit-detail', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            detailIndex: this.contextIndex
+          }
+        }));
+      }
+
+      deleteDetail() {
+        this.dispatchEvent(new CustomEvent('trigger-delete-detail', {
           bubbles: true,
           composed: true,
           detail: {

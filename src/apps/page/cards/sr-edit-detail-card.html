@@ -198,14 +198,18 @@
         };
       }
 
-      _setDetail() {
+      _setDetail(detailId, detailContent) {
+        if (detailId) {
+          this.editingDetail.id = detailId;
+        }
+        this.editingDetail.content = detailContent;
         var detailIndex = this.editingDetailIndex;
         if (detailIndex === null) {
-          this.page.details.list.push(this.editingDetail);
+          this.page.details.list.push(this._copyJson(this.editingDetail));
           this.notifyPath('page.details.list');
         } else {
-          this.page.details.list[detailIndex] = this.editingDetail;
-          this.notifyPath('page.details.list[detailIndex]');
+          this.page.details.list[detailIndex] = this._copyJson(this.editingDetail);
+          this.notifyPath('page.details.list');
         }
       }
 
@@ -242,16 +246,20 @@
         this.$.editPageDetailAjax.generateRequest();
       }
 
-      handleEditDetail() {
-        this._setDetail();
+      handleEditDetail(event) {
+        this._handleEditDetail(null, event.detail.response.content);        
+      }
+
+      _handleEditDetail(detailId, detailContent) {
+        this._setDetail(detailId, detailContent);
         this.dispatchEvent(new CustomEvent('close-edit-detail', {
           bubbles: true,
           composed: true
         }));
       }
 
-      handleAddDetail() {
-        this.handleEditDetail();
+      handleAddDetail(event) {
+        this._handleEditDetail(event.detail.response.id, event.detail.response.content);
       }
     }
 

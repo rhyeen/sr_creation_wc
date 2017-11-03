@@ -2,12 +2,12 @@
 <link rel="import" href="../cards/sr-edit-detail-card.html">
 <link rel="import" href="../header-options/sr-details-header-options.html">
 <link rel="import" href="../dialogs/sr-page-search-dialog.html">
+<link rel="import" href="../dialogs/sr-delete-detail-dialog.html">
 <link rel="import" href="../../sr-main-app-drawer-content.html">
 
 <dom-module id="sr-details-view">
   <template>
     <style include="shared-styles">
-
     </style>
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <app-drawer
@@ -29,7 +29,7 @@
           </app-toolbar>
         </app-header>
         <template is="dom-if" if="[[showDetailCard]]">
-          <template is="dom-repeat" items="{{page.details.list}}">
+          <template id="detailCards" is="dom-repeat" items="{{page.details.list}}">
             <sr-detail-card
                 context-item="[[item]]"
                 context-index="[[index]]"></sr-detail-card>
@@ -49,6 +49,10 @@
     </app-drawer-layout>
     <sr-page-search-dialog
         id="pageSearchDialog"></sr-page-search-dialog>
+    <sr-delete-detail-dialog
+        id="deleteDetailDialog"
+        page="{{page}}"
+        detail-index="[[editingDetailIndex]]"></sr-delete-detail-dialog>
   </template>
   <script>
     class SrDetailsView extends Polymer.Element {
@@ -100,7 +104,16 @@
         return [
           '_pageIdChanged(page.id)',
           '_editingDetailNameChanged(editingDetail.name)',
+          '_pageDetailListChanged(page.details.list)',
         ];
+      }
+
+      _pageDetailListChanged(pageDetails) {
+        // changes to the list (specifically pushes) are not causing the dom-repeat to rerender.  So we're forcing it.
+        var detailCards = this.shadowRoot.querySelector("#detailCards");
+        if (detailCards) {
+          detailCards.render();
+        };
       }
 
       _editingDetailNameChanged(editingDetailName) {
@@ -121,10 +134,11 @@
       ready() {
         super.ready();
         // @DEBUG: remove once done testing
-        this._triggerAddDetailChangeListener(null);
+        // this._triggerAddDetailChangeListener(null);
         this.addEventListener('toggle-drawer', e => this._toggleDrawerChangeListener(e));
         this.addEventListener('trigger-add-detail', e => this._triggerAddDetailChangeListener(e));
         this.addEventListener('trigger-edit-detail', e => this._triggerEditDetailChangeListener(e));
+        this.addEventListener('trigger-delete-detail', e => this._triggerDeleteDetialChangeListener(e));
         this.addEventListener('trigger-reorder-details', e => this._triggerReorderDetailsChangeListener(e));
         this.addEventListener('trigger-page-confirmation', e => this._triggerPageConfirmationChangeListener(e));
         this.addEventListener('trigger-search', e => this._triggerSearchChangeListener(e));
@@ -133,6 +147,11 @@
 
       _toggleDrawerChangeListener(event) {
         this.$.drawer.toggle();
+      }
+
+      _triggerDeleteDetialChangeListener(event) {
+        this.set('editingDetailIndex', event.detail.detailIndex);
+        this.$.deleteDetailDialog.toggle();
       }
 
       _triggerAddDetailChangeListener(event) {
